@@ -1,0 +1,104 @@
+╔════════════════════════════════════════════════════════════════════════╗
+║                                                                        ║
+║                    🧠 CerebroAI Backend Setup 🧠                       ║
+║                                                                        ║
+╚════════════════════════════════════════════════════════════════════════╝
+
+Your frontend is working, but the backend server needs to be started!
+
+┌────────────────────────────────────────────────────────────────────────┐
+│  QUICK START (3 Simple Steps)                                         │
+└────────────────────────────────────────────────────────────────────────┘
+
+  Step 1: Check your setup
+  ────────────────────────────────────────────────────────────
+  Right-click → "Run with PowerShell":
+    ▶ check-setup.ps1
+  
+  This will tell you if everything is ready.
+
+
+  Step 2: Start the backend server
+  ────────────────────────────────────────────────────────────
+  Double-click:
+    ▶ start-backend.bat
+  
+  Keep this window OPEN while using the app.
+  You should see: "Application startup complete"
+
+
+  Step 3: Test your app
+  ────────────────────────────────────────────────────────────
+  Go to: http://localhost:3000
+  Upload an MRI image
+  Click "Compute Telemetry"
+  
+  ✓ You should now see real predictions!
+
+
+┌────────────────────────────────────────────────────────────────────────┐
+│  IMPORTANT NOTES                                                       │
+└────────────────────────────────────────────────────────────────────────┘
+
+  ⚠ Without trained model weights (mri_model.pth):
+     → Server runs in SIMULATION mode
+     → Predictions are random (for testing only)
+  
+  ✓ With trained model weights:
+     → Server uses your real AI model
+     → Predictions are accurate
+
+
+┌────────────────────────────────────────────────────────────────────────┐
+│  TO TRAIN YOUR MODEL (Optional - for real predictions)                │
+└────────────────────────────────────────────────────────────────────────┘
+
+  1. Open Jupyter Notebook
+  
+  2. Navigate to: D:\Programming\AI\MRI\MRI\
+  
+  3. Open: Class-MRI-Brain-Tumor.ipynb
+  
+  4. Run all cells to train the model
+  
+  5. After training, add a new cell and run:
+     ┌──────────────────────────────────────────────────────┐
+     │ import torch                                         │
+     │ torch.save(model.state_dict(), 'mri_model.pth')     │
+     │ print('✓ Model saved!')                             │
+     └──────────────────────────────────────────────────────┘
+  
+  6. Restart the backend server (start-backend.bat)
+
+
+┌────────────────────────────────────────────────────────────────────────┐
+│  TROUBLESHOOTING                                                       │
+└────────────────────────────────────────────────────────────────────────┘
+
+  Problem: "ERR_CONNECTION_REFUSED" in browser
+  Solution: Start the backend server (start-backend.bat)
+
+  Problem: Port 8000 already in use
+  Solution: Close any other programs using port 8000
+           Or restart your computer
+
+  Problem: Always getting "No Tumor"
+  Solution: This was a bug (now fixed). Start the real backend
+           or refresh and try different images.
+
+
+┌────────────────────────────────────────────────────────────────────────┐
+│  FILES YOU NEED                                                        │
+└────────────────────────────────────────────────────────────────────────┘
+
+  ✓ check-setup.ps1       - Check if everything is ready
+  ✓ start-backend.bat     - Start the backend server
+  ✓ BACKEND-SETUP.md      - Detailed setup instructions
+  ✓ export-model-weights.py - Helper to check model weights
+
+
+╔════════════════════════════════════════════════════════════════════════╗
+║                                                                        ║
+║  👉 START HERE: Double-click "start-backend.bat"                      ║
+║                                                                        ║
+╚════════════════════════════════════════════════════════════════════════╝

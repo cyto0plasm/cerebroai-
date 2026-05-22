@@ -1,0 +1,116 @@
+CEREBROAI — DEPLOY CHECKLIST (plain commands)
+=============================================
+
+You need (free accounts):
+  - GitHub account
+  - Hugging Face account  → https://huggingface.co/join
+  - Vercel account        → https://vercel.com (sign in with GitHub)
+
+You already have:
+  - Model file at D:\Programming\AI\MRI\MRI\mri_model.pth  ✓
+
+Replace YOUR_HF_USERNAME and YOUR_GITHUB_USERNAME everywhere below.
+
+
+── STEP 1: Put model weights on Hugging Face (5 min) ──
+
+1. Open browser: https://huggingface.co/new
+2. Name: cerebroai-model   |   Type: Model   |   Public
+3. Click Create
+4. Add file → Upload files → pick:
+     D:\Programming\AI\MRI\MRI\mri_model.pth
+5. Commit upload
+
+Your model URL will be:
+  https://huggingface.co/YOUR_HF_USERNAME/cerebroai-model
+
+
+── STEP 2: Deploy backend (Hugging Face Space) (10 min) ──
+
+1. Open browser: https://huggingface.co/new-space
+2. Space name: cerebroai-backend   |   SDK: Docker   |   Public
+3. Click Create Space
+
+4. In PowerShell, run ONE block (edit YOUR_HF_USERNAME first):
+
+cd $env:TEMP
+git clone https://huggingface.co/spaces/YOUR_HF_USERNAME/cerebroai-backend
+cd cerebroai-backend
+Copy-Item -Path "C:\Users\cyto0\.gemini\antigravity\scratch\brain-mri-tumor-detector\hf-space\*" -Destination . -Force
+git add .
+git commit -m "Deploy CerebroAI backend"
+git push
+
+   (If git asks for login: use HF token as password — Settings → Access Tokens → New token, role Write)
+
+5. On the Space page → Settings → Repository secrets → New secret:
+     Name:  HF_MODEL_REPO
+     Value: YOUR_HF_USERNAME/cerebroai-model
+
+6. Wait until Space status = Running (3–8 min)
+
+7. Test in browser (replace YOUR_HF_USERNAME):
+     https://YOUR_HF_USERNAME-cerebroai-backend.hf.space/
+   You should see: "model_loaded": true
+
+   SAVE THIS URL — you need it for Vercel:
+     https://YOUR_HF_USERNAME-cerebroai-backend.hf.space
+
+
+── STEP 3: Push frontend to GitHub (5 min) ──
+
+1. Create empty repo on GitHub: https://github.com/new
+   Name: cerebroai   |   Public   |   do NOT add README
+
+2. In PowerShell:
+
+cd "C:\Users\cyto0\.gemini\antigravity\scratch\brain-mri-tumor-detector"
+git init
+git add .
+git commit -m "CerebroAI frontend and deployment config"
+git branch -M main
+git remote add origin https://github.com/YOUR_GITHUB_USERNAME/cerebroai.git
+git push -u origin main
+
+   (Use GitHub login or personal access token if prompted)
+
+
+── STEP 4: Deploy frontend on Vercel (5 min) ──
+
+1. Open: https://vercel.com/new
+2. Import Git Repository → pick cerebroai
+3. Framework: Vite (auto-detected) → Deploy
+4. After first deploy: Project → Settings → Environment Variables
+     Name:  VITE_API_BASE_URL
+     Value: https://YOUR_HF_USERNAME-cerebroai-backend.hf.space
+     Environment: Production (and Preview if you want)
+5. Deployments → ⋯ on latest → Redeploy
+
+Your live app:
+  https://cerebroai-XXXX.vercel.app  (Vercel shows the exact URL)
+
+
+── STEP 5: Test end-to-end ──
+
+1. Open your Vercel URL
+2. Go to Dashboard → upload a brain MRI image
+3. First request after idle may take ~30s (HF free tier wakes up) — normal
+4. Result should show Tumor / No Tumor with confidence
+
+
+── TROUBLESHOOTING ──
+
+model_loaded: false
+  → Check HF_MODEL_REPO secret spelling (username/repo, no https)
+
+Frontend can't reach API
+  → VITE_API_BASE_URL must match Space URL exactly (https, no trailing slash)
+  → Redeploy Vercel after changing the variable
+
+git push to HF fails
+  → Install Git LFS: git lfs install
+  → Use HF token as password when prompted
+
+Still stuck?
+  → Run: .\check-setup.ps1
+  → Read: DEPLOY.md
