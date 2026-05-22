@@ -1,6 +1,7 @@
 import os
 import base64
 import random
+import threading
 import numpy as np
 import cv2
 import torch
@@ -14,13 +15,32 @@ app = FastAPI(title="CerebroAI Backend")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],   # Vercel frontend URL — set to specific domain in production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ── Model ─────────────────────────────────────────────────────────────────────
+DEFAULT_MODEL_REPO = "cyto0plasm/MRI_IMAGING_TOMUR_DETECTOR"
+HF_MODEL_REPO = os.environ.get("HF_MODEL_REPO", DEFAULT_MODEL_REPO).strip()
+
+device = torch.device("cpu")
+model = None
+THRESHOLD = 0.40
+_model_lock = threading.Lock()
+_load_error = None
+
+IMAGENET_MEAN = [0.485, 0.456, 0.406]
+IMAGENET_STD = [0.229, 0.224, 0.225]
+
+preprocess = transforms.Compose([
+    transforms.ToPILImage(),
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+    transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
+])
+
+
 def build_resnet():
     m = models.resnet18(weights=None)
     in_features = m.fc.in_features
@@ -34,71 +54,60 @@ def build_resnet():
     )
     return m
 
-device    = torch.device("cpu")   # HF free tier is CPU
-model     = None
-THRESHOLD = 0.40
 
-IMAGENET_MEAN = [0.485, 0.456, 0.406]
-IMAGENET_STD  = [0.229, 0.224, 0.225]
-
-preprocess = transforms.Compose([
-    transforms.ToPILImage(),
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-    transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
-])
-
-# ── Load weights from HF Model Hub ───────────────────────────────────────────
-# Upload your mri_model.pth to:
-#   https://huggingface.co/YOUR_HF_USERNAME/cerebroai-model
-# as a model repository, then set HF_MODEL_REPO below.
-HF_MODEL_REPO = os.environ.get("HF_MODEL_REPO", "")   # set as Space secret
-
-@app.on_event("startup")
-def load_weights():
-    global model, THRESHOLD
-    m = build_resnet().to(device)
-
-    weights_path = None
-
-    # Try local file first (for local dev)
+def _resolve_weights_path():
     local_path = os.path.join(os.path.dirname(__file__), "mri_model.pth")
     if os.path.exists(local_path):
-        weights_path = local_path
         print("[CerebroAI]: Using local mri_model.pth")
+        return local_path
 
-    # Otherwise download from HF Hub
-    elif HF_MODEL_REPO:
-        try:
-            print(f"[CerebroAI]: Downloading weights from {HF_MODEL_REPO}...")
-            weights_path = hf_hub_download(
-                repo_id=HF_MODEL_REPO,
-                filename="mri_model.pth",
-                repo_type="model"
-            )
-            print("[CerebroAI]: Download complete.")
-        except Exception as e:
-            print(f"[CerebroAI Warning]: Could not download weights: {e}")
+    if HF_MODEL_REPO:
+        print(f"[CerebroAI]: Downloading weights from {HF_MODEL_REPO}...")
+        return hf_hub_download(
+            repo_id=HF_MODEL_REPO,
+            filename="mri_model.pth",
+            repo_type="model",
+        )
 
-    if weights_path:
+    return None
+
+
+def ensure_model_loaded():
+    """Lazy load so the container starts fast and passes HF health checks."""
+    global model, THRESHOLD, _load_error
+
+    if model is not None:
+        return
+
+    with _model_lock:
+        if model is not None:
+            return
+
         try:
-            checkpoint = torch.load(weights_path, map_location=device)
+            m = build_resnet().to(device)
+            weights_path = _resolve_weights_path()
+
+            if not weights_path:
+                _load_error = "No weights path (set HF_MODEL_REPO secret)"
+                print(f"[CerebroAI Warning]: {_load_error}")
+                return
+
+            checkpoint = torch.load(weights_path, map_location=device, weights_only=False)
             if isinstance(checkpoint, dict) and "model_state_dict" in checkpoint:
                 m.load_state_dict(checkpoint["model_state_dict"])
                 THRESHOLD = checkpoint.get("threshold", 0.40)
             else:
                 m.load_state_dict(checkpoint)
+
             m.eval()
             model = m
+            _load_error = None
             print(f"[CerebroAI]: Model ready. Threshold={THRESHOLD:.2f}")
         except Exception as e:
+            _load_error = str(e)
             print(f"[CerebroAI Warning]: Failed to load weights: {e}")
-            model = None
-    else:
-        print("[CerebroAI]: No weights found — simulation mode.")
-        model = None
 
-# ── Grad-CAM ──────────────────────────────────────────────────────────────────
+
 def generate_gradcam(m, img_tensor, original_bgr):
     gradients, activations = [], []
     fh = m.layer4.register_forward_hook(lambda mod, inp, out: activations.append(out))
@@ -107,9 +116,11 @@ def generate_gradcam(m, img_tensor, original_bgr):
     m.zero_grad()
     out = m(img_tensor)
     out.backward()
-    fh.remove(); bh.remove()
+    fh.remove()
+    bh.remove()
 
-    grads = gradients[0]; acts = activations[0]
+    grads = gradients[0]
+    acts = activations[0]
     weights = grads.mean(dim=(2, 3), keepdim=True)
     cam = torch.relu((weights * acts).sum(dim=1)).squeeze(0)
     cam = cam.detach().cpu().numpy()
@@ -130,14 +141,29 @@ def generate_gradcam(m, img_tensor, original_bgr):
     _, buf = cv2.imencode(".png", cv2.cvtColor(blended, cv2.COLOR_RGB2BGR))
     return "data:image/png;base64," + base64.b64encode(buf).decode()
 
-# ── Predict ───────────────────────────────────────────────────────────────────
+
 @app.get("/")
 def root():
-    return {"status": "CerebroAI backend running", "model_loaded": model is not None}
+    return {
+        "status": "CerebroAI backend running",
+        "model_loaded": model is not None,
+        "model_repo": HF_MODEL_REPO,
+        "load_error": _load_error,
+    }
+
 
 @app.post("/api/predict")
 async def predict(image: UploadFile = File(...)):
-    if not image.content_type.startswith("image/"):
+    ensure_model_loaded()
+
+    if model is None:
+        raise HTTPException(
+            status_code=503,
+            detail=_load_error or "Model not loaded. Check HF_MODEL_REPO secret and Space logs.",
+        )
+
+    content_type = image.content_type or ""
+    if not content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Invalid file type.")
 
     try:
@@ -151,23 +177,19 @@ async def predict(image: UploadFile = File(...)):
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
         heatmap_b64 = None
 
-        if model is not None:
-            img_tensor = preprocess(img_rgb).unsqueeze(0).to(device)
-            try:
-                grad_tensor = img_tensor.clone().requires_grad_(True)
-                with torch.enable_grad():
-                    probability = model(grad_tensor).item()
-                    heatmap_b64 = generate_gradcam(model, grad_tensor, img_bgr)
-            except Exception as e:
-                print(f"[CerebroAI]: Grad-CAM failed: {e}")
-                with torch.no_grad():
-                    probability = model(img_tensor).item()
-            is_tumor = probability >= THRESHOLD
-        else:
-            is_tumor = random.random() > 0.5
-            probability = random.uniform(0.78, 0.99) if is_tumor else random.uniform(0.01, 0.22)
+        img_tensor = preprocess(img_rgb).unsqueeze(0).to(device)
+        try:
+            grad_tensor = img_tensor.clone().requires_grad_(True)
+            with torch.enable_grad():
+                probability = model(grad_tensor).item()
+                heatmap_b64 = generate_gradcam(model, grad_tensor, img_bgr)
+        except Exception as e:
+            print(f"[CerebroAI]: Grad-CAM failed: {e}")
+            with torch.no_grad():
+                probability = model(img_tensor).item()
 
-        label      = "Tumor" if is_tumor else "No Tumor"
+        is_tumor = probability >= THRESHOLD
+        label = "Tumor" if is_tumor else "No Tumor"
         confidence = float(probability) if is_tumor else float(1.0 - probability)
 
         print(f"[CerebroAI]: {label} ({confidence * 100:.1f}%)")

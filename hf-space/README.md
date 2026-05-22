@@ -4,6 +4,7 @@ emoji: 🧠
 colorFrom: blue
 colorTo: red
 sdk: docker
+app_port: 7860
 pinned: false
 ---
 
@@ -23,5 +24,11 @@ Returns:
   "heatmap": "data:image/png;base64,..."
 }
 ```
+
+## Space secret (Settings → Repository secrets)
+
+| Name | Value |
+|------|--------|
+| `HF_MODEL_REPO` | `cyto0plasm/MRI_IMAGING_TOMUR_DETECTOR` |
 
 > For research and educational use only. Not for clinical diagnosis.
