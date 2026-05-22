@@ -1,10 +1,27 @@
 /**
  * Application Configuration
+ *
+ * VITE_API_BASE_URL is baked in at build time (Vercel: set under Environment Variables, then redeploy).
+ * If missing on production, DEFAULT_PRODUCTION_API is used so the live site never calls localhost.
  */
+const DEFAULT_PRODUCTION_API = 'https://cyto0plasm-cerebroai-backend.hf.space';
+
+function resolveApiBaseUrl() {
+  const fromEnv = import.meta.env.VITE_API_BASE_URL?.trim();
+
+  if (fromEnv && !fromEnv.includes('YOUR-HF') && !fromEnv.includes('YOUR_USERNAME')) {
+    return fromEnv.replace(/\/$/, '');
+  }
+
+  if (import.meta.env.PROD) {
+    return DEFAULT_PRODUCTION_API;
+  }
+
+  return 'http://localhost:8000';
+}
+
 export const CONFIG = {
-  // Base URL of the AI API server
-  // In production this is set via VITE_API_BASE_URL environment variable on Vercel
-  API_BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
+  API_BASE_URL: resolveApiBaseUrl(),
 
   // Longer timeout to handle Hugging Face Space cold starts (~30s wake-up)
   API_TIMEOUT: 60000,
