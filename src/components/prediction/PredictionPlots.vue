@@ -40,17 +40,20 @@
       id="prediction-plots-panel"
       class="border-t border-surface-100 animate-fade-in"
     >
-      <!-- Tab bar -->
-      <div class="px-4 pt-3 pb-0 flex gap-1 overflow-x-auto scrollbar-thin">
+      <!-- Tab bar with better spacing -->
+      <div class="px-4 pt-4 pb-2 flex gap-2 overflow-x-auto scrollbar-thin border-b border-surface-100" role="tablist" aria-label="Visual analysis plots">
         <button
           v-for="tab in visibleTabs"
           :key="tab.id"
           type="button"
+          role="tab"
+          :aria-selected="activeTab === tab.id"
+          :id="`tab-${tab.id}`"
           @click="activeTab = tab.id"
           :class="[
-            'px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500',
+            'px-4 py-2.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-500',
             activeTab === tab.id
-              ? 'bg-brand-50 text-brand-700 border border-brand-100'
+              ? 'bg-brand-50 text-brand-700 border border-brand-200'
               : 'text-surface-500 hover:text-surface-800 hover:bg-surface-50 border border-transparent'
           ]"
         >
@@ -58,7 +61,7 @@
         </button>
       </div>
 
-      <div class="p-4 sm:p-5">
+      <div class="p-5 sm:p-6 pb-8" role="tabpanel" :aria-labelledby="`tab-${activeTab}`">
         <!-- Original scan -->
         <div v-if="activeTab === 'original'" class="flex flex-col gap-3">
           <p class="text-xs text-surface-500 leading-relaxed">

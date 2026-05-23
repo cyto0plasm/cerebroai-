@@ -144,11 +144,16 @@ def generate_gradcam(m, img_tensor, original_bgr):
 
 @app.get("/")
 def root():
+    ensure_model_loaded()
     return {
         "status": "CerebroAI backend running",
         "model_loaded": model is not None,
         "model_repo": HF_MODEL_REPO,
         "load_error": _load_error,
+        "architecture": "ResNet18",
+        "input_size": "224x224",
+        "threshold": round(THRESHOLD, 2) if model is not None else None,
+        "version": "1.3.0",
     }
 
 
@@ -173,6 +178,12 @@ async def predict(image: UploadFile = File(...)):
 
         if img_bgr is None:
             raise HTTPException(status_code=400, detail="Failed to decode image.")
+
+        h, w = img_bgr.shape[:2]
+        if min(h, w) < 128:
+            raise HTTPException(status_code=400, detail=f"Image too small ({w}x{h}). Minimum 128px per side.")
+        if max(h, w) > 8192:
+            raise HTTPException(status_code=400, detail=f"Image too large ({w}x{h}). Maximum 8192px per side.")
 
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
         heatmap_b64 = None

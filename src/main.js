@@ -3,6 +3,10 @@ import { createPinia } from 'pinia';
 import router from './router';
 import App from './App.vue';
 import './styles/index.css';
+import { setLocale } from './i18n';
+
+// Initialize locale
+setLocale(localStorage.getItem('locale') || 'en');
 
 const app = createApp(App);
 const pinia = createPinia();

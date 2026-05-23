@@ -1,8 +1,5 @@
 import { MOCK_DIAGNOSTIC_REPORTS, TUMOR_CLASSES } from '../constants';
 
-/**
- * Build a complete scan record with report fields and plots metadata.
- */
 export function buildScanRecord(scanResult, id = `scan-${Date.now()}`) {
   let findings = '';
   let severity = '';
@@ -29,6 +26,11 @@ export function buildScanRecord(scanResult, id = `scan-${Date.now()}`) {
     confidence: scanResult.confidence,
     isMocked: scanResult.isMocked || false,
     heatmap: scanResult.heatmap || null,
+    patientId: scanResult.patientId?.trim() || null,
+    batchId: scanResult.batchId || null,
+    sliceIndex: scanResult.sliceIndex ?? null,
+    imageWidth: scanResult.imageWidth ?? null,
+    imageHeight: scanResult.imageHeight ?? null,
     findings,
     severity,
     recommendation,
@@ -43,4 +45,19 @@ export function loadHistoryFromStorage() {
       ...item,
       previewUrl: item.previewUrl?.startsWith('blob:') ? null : item.previewUrl,
     }));
+}
+
+export function aggregateBatchPredictions(results) {
+  const tumorVotes = results.filter(r => r.prediction === TUMOR_CLASSES.TUMOR).length;
+  const total = results.length;
+  const majorityTumor = tumorVotes > total / 2;
+  const avgConf =
+    results.reduce((s, r) => s + r.confidence, 0) / Math.max(total, 1);
+
+  return {
+    prediction: majorityTumor ? TUMOR_CLASSES.TUMOR : TUMOR_CLASSES.NO_TUMOR,
+    confidence: Number(avgConf.toFixed(2)),
+    tumorVotes,
+    total,
+  };
 }

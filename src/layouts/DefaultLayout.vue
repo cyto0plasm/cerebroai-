@@ -1,36 +1,37 @@
 <template>
-  <div class="min-h-screen bg-surface-50 text-surface-900 flex flex-col">
+  <div class="min-h-screen bg-surface-50 dark:bg-surface-900 text-surface-900 dark:text-surface-100 flex flex-col">
 
-    <!-- Header -->
-    <header class="sticky top-0 z-40 bg-white border-b border-surface-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-
+    <header class="sticky top-0 z-40 bg-white dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         <AppLogo to="/" size="md" />
 
-        <!-- Desktop Nav -->
-        <nav class="hidden md:flex items-center gap-1">
+        <nav class="hidden md:flex items-center gap-1" aria-label="Main">
           <router-link
             to="/"
-            class="px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-            :class="route.name === 'landing' ? 'bg-surface-100 text-surface-900' : 'text-surface-500 hover:text-surface-900 hover:bg-surface-50'"
+            class="px-3 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500"
+            :class="route.name === 'landing' ? 'bg-surface-100 dark:bg-surface-700 text-surface-900 dark:text-surface-100' : 'text-surface-500 hover:text-surface-900 dark:hover:text-surface-100'"
           >
             Overview
           </router-link>
           <router-link
             to="/dashboard"
-            class="px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-            :class="route.name === 'dashboard' ? 'bg-surface-100 text-surface-900' : 'text-surface-500 hover:text-surface-900 hover:bg-surface-50'"
+            class="px-3 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500"
+            :class="route.name === 'dashboard' ? 'bg-surface-100 dark:bg-surface-700 text-surface-900 dark:text-surface-100' : 'text-surface-500 hover:text-surface-900 dark:hover:text-surface-100'"
           >
             Dashboard
           </router-link>
+          <router-link
+            to="/limitations"
+            class="px-3 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500"
+            :class="route.name === 'limitations' ? 'bg-surface-100 dark:bg-surface-700' : 'text-surface-500 hover:text-surface-900 dark:hover:text-surface-100'"
+          >
+            Limitations
+          </router-link>
         </nav>
 
-        <!-- Right actions -->
         <div class="hidden md:flex items-center gap-3">
-          <div class="flex items-center gap-1.5 text-xs font-medium text-success-600">
-            <span class="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse"></span>
-            System online
-          </div>
+          <BackendStatus />
+          <ThemeToggle />
           <router-link to="/dashboard">
             <BaseButton variant="primary" size="sm">
               Analyze a scan
@@ -39,46 +40,40 @@
           </router-link>
         </div>
 
-        <!-- Mobile toggle -->
         <button
+          type="button"
           @click="isMobileMenuOpen = !isMobileMenuOpen"
-          class="md:hidden p-2 rounded-lg text-surface-500 hover:bg-surface-100 transition-colors"
+          class="md:hidden p-2 rounded-lg text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-700 focus:outline-none focus:ring-2 focus:ring-brand-500"
+          :aria-expanded="isMobileMenuOpen"
+          aria-label="Menu"
         >
           <Menu v-if="!isMobileMenuOpen" class="w-5 h-5" />
           <X v-else class="w-5 h-5" />
         </button>
       </div>
 
-      <!-- Mobile menu -->
-      <div v-if="isMobileMenuOpen" class="md:hidden border-t border-surface-200 bg-white px-4 py-3 flex flex-col gap-1 animate-fade-in">
-        <router-link to="/" @click="isMobileMenuOpen = false"
-          class="px-3 py-2 rounded-lg text-sm font-medium text-surface-700 hover:bg-surface-50">
-          Overview
-        </router-link>
-        <router-link to="/dashboard" @click="isMobileMenuOpen = false"
-          class="px-3 py-2 rounded-lg text-sm font-medium text-surface-700 hover:bg-surface-50">
-          Dashboard
-        </router-link>
-        <div class="pt-3 mt-1 border-t border-surface-100">
-          <router-link to="/dashboard" @click="isMobileMenuOpen = false">
-            <BaseButton variant="primary" size="sm" class="w-full">
-              Analyze a scan
-            </BaseButton>
-          </router-link>
+      <div v-if="isMobileMenuOpen" class="md:hidden border-t border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 px-4 py-3 flex flex-col gap-1">
+        <router-link to="/" @click="isMobileMenuOpen = false" class="px-3 py-2 rounded-lg text-sm font-medium">Overview</router-link>
+        <router-link to="/dashboard" @click="isMobileMenuOpen = false" class="px-3 py-2 rounded-lg text-sm font-medium">Dashboard</router-link>
+        <router-link to="/limitations" @click="isMobileMenuOpen = false" class="px-3 py-2 rounded-lg text-sm font-medium">Limitations</router-link>
+        <div class="pt-2 flex items-center gap-2">
+          <BackendStatus />
+          <ThemeToggle />
         </div>
+        <router-link to="/dashboard" @click="isMobileMenuOpen = false" class="pt-2">
+          <BaseButton variant="primary" size="sm" class="w-full">Analyze a scan</BaseButton>
+        </router-link>
       </div>
     </header>
 
-    <!-- Medical disclaimer (always visible) -->
-    <div class="bg-amber-50 border-b border-amber-200 px-4 sm:px-6 lg:px-8 py-2.5">
-      <p class="max-w-7xl mx-auto text-xs text-amber-900 leading-relaxed">
+    <div class="bg-amber-50 dark:bg-amber-950/40 border-b border-amber-200 dark:border-amber-800 px-4 sm:px-6 lg:px-8 py-2.5">
+      <p class="max-w-7xl mx-auto text-xs text-amber-900 dark:text-amber-100 leading-relaxed">
         <strong>Not for clinical use.</strong>
-        This tool is for research and education only. It is not FDA-cleared, not validated for diagnosis,
-        and must not replace a qualified radiologist or physician. Do not use results to make medical decisions.
+        Research and education only — not FDA-cleared. Do not use results for medical decisions.
+        <router-link to="/limitations" class="underline font-semibold ml-1">Read limitations</router-link>
       </p>
     </div>
 
-    <!-- Page content -->
     <main class="flex-grow flex flex-col">
       <router-view v-slot="{ Component }">
         <transition name="page-fade" mode="out-in">
@@ -87,32 +82,31 @@
       </router-view>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-surface-200 py-10 px-4 sm:px-6 lg:px-8 mt-auto">
-      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+    <footer class="bg-white dark:bg-surface-800 border-t border-surface-200 dark:border-surface-700 py-10 px-4 sm:px-6 lg:px-8 mt-auto">
+      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between gap-6">
         <div class="flex flex-col gap-1.5">
           <AppLogo :link="false" size="sm" />
-          <p class="text-xs text-surface-400 max-w-xs">
-            AI-powered brain MRI tumor detection. For research and educational use only.
-          </p>
+          <p class="text-xs text-surface-400 max-w-xs">Brain MRI tumor screening · research use only</p>
         </div>
-
-        <div class="flex flex-col sm:flex-row gap-8 text-sm text-surface-500">
+        <div class="flex gap-8 text-sm text-surface-500">
           <div class="flex flex-col gap-2">
-            <span class="text-xs font-semibold text-surface-700 uppercase tracking-wide">Navigation</span>
-            <router-link to="/" class="hover:text-surface-900 transition-colors">Overview</router-link>
-            <router-link to="/dashboard" class="hover:text-surface-900 transition-colors">Dashboard</router-link>
+            <span class="text-xs font-semibold uppercase tracking-wide text-surface-700 dark:text-surface-300">Navigation</span>
+            <router-link to="/" class="hover:text-surface-900 dark:hover:text-surface-100">Overview</router-link>
+            <router-link to="/dashboard" class="hover:text-surface-900 dark:hover:text-surface-100">Dashboard</router-link>
+            <router-link to="/limitations" class="hover:text-surface-900 dark:hover:text-surface-100">Limitations</router-link>
           </div>
           <div class="flex flex-col gap-2">
-            <span class="text-xs font-semibold text-surface-700 uppercase tracking-wide">System</span>
-            <span class="text-xs text-surface-400">Version 1.2.0</span>
-            <span class="text-xs text-surface-400">Cloud demo · not clinical</span>
+            <span class="text-xs font-semibold uppercase tracking-wide text-surface-700 dark:text-surface-300">System</span>
+            <span class="text-xs">v{{ CONFIG.VERSION }}</span>
+            <button type="button" class="text-xs text-left hover:text-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 rounded" @click="app.resetOnboarding()">
+              Replay tour
+            </button>
           </div>
         </div>
       </div>
-      <div class="max-w-7xl mx-auto mt-8 pt-6 border-t border-surface-100 text-xs text-surface-400">
+      <p class="max-w-7xl mx-auto mt-8 pt-6 border-t border-surface-100 dark:border-surface-700 text-xs text-surface-400">
         © 2026 CerebroAI. Not intended for clinical diagnosis.
-      </div>
+      </p>
     </footer>
   </div>
 </template>
@@ -123,8 +117,13 @@ import { useRoute } from 'vue-router';
 import { ArrowRight, Menu, X } from 'lucide-vue-next';
 import BaseButton from '../components/ui/BaseButton.vue';
 import AppLogo from '../components/ui/AppLogo.vue';
+import BackendStatus from '../components/layout/BackendStatus.vue';
+import ThemeToggle from '../components/layout/ThemeToggle.vue';
+import { useAppStore } from '../stores/appStore';
+import { CONFIG } from '../config';
 
 const route = useRoute();
+const app = useAppStore();
 const isMobileMenuOpen = ref(false);
 </script>
 

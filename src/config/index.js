@@ -1,8 +1,5 @@
 /**
  * Application Configuration
- *
- * VITE_API_BASE_URL is baked in at build time (Vercel: set under Environment Variables, then redeploy).
- * If missing on production, DEFAULT_PRODUCTION_API is used so the live site never calls localhost.
  */
 const DEFAULT_PRODUCTION_API = 'https://cyto0plasm-cerebroai-backend.hf.space';
 
@@ -22,18 +19,25 @@ function resolveApiBaseUrl() {
 
 export const CONFIG = {
   API_BASE_URL: resolveApiBaseUrl(),
-
-  // Longer timeout to handle Hugging Face Space cold starts (~30s wake-up)
   API_TIMEOUT: 60000,
-
-  // Mock results only when developing locally — never in production builds
   ENABLE_MOCK_FALLBACK: !import.meta.env.PROD,
-
   MOCK_DELAY_MS: 1800,
 
   MAX_FILE_SIZE_BYTES: 10 * 1024 * 1024,
+  MIN_IMAGE_DIMENSION: 128,
+  MAX_IMAGE_DIMENSION: 8192,
+  MAX_ASPECT_RATIO: 4,
+
   ALLOWED_IMAGE_TYPES: ['image/jpeg', 'image/png', 'image/tiff', 'image/bmp'],
+  ALLOWED_EXTENSIONS: ['.jpg', '.jpeg', '.png', '.tiff', '.tif', '.bmp', '.dcm', '.dicom'],
+  DICOM_EXTENSIONS: ['.dcm', '.dicom'],
+
+  MODEL_DISPLAY: {
+    architecture: 'ResNet18',
+    inputSize: '224×224',
+    version: '1.2.0',
+  },
 
   APP_NAME: 'CerebroAI',
-  VERSION: '1.2.0'
+  VERSION: '1.3.0',
 };

@@ -124,6 +124,18 @@ def generate_gradcam(m, img_tensor: torch.Tensor, original_bgr: np.ndarray) -> s
     return "data:image/png;base64," + base64.b64encode(buf).decode()
 
 
+@app.get("/")
+def root():
+    return {
+        "status": "CerebroAI backend running",
+        "model_loaded": model is not None,
+        "architecture": "ResNet18",
+        "input_size": "224x224",
+        "threshold": round(THRESHOLD, 2) if model is not None else None,
+        "version": "1.3.0",
+    }
+
+
 # ── Predict ───────────────────────────────────────────────────────────────────
 @app.post("/api/predict")
 async def predict(image: UploadFile = File(...)):
@@ -137,6 +149,12 @@ async def predict(image: UploadFile = File(...)):
 
         if img_bgr is None:
             raise HTTPException(status_code=400, detail="Failed to decode image.")
+
+        h, w = img_bgr.shape[:2]
+        if min(h, w) < 128:
+            raise HTTPException(status_code=400, detail=f"Image too small ({w}x{h}). Minimum 128px per side.")
+        if max(h, w) > 8192:
+            raise HTTPException(status_code=400, detail=f"Image too large ({w}x{h}). Maximum 8192px per side.")
 
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
 

@@ -1,0 +1,74 @@
+═══════════════════════════════════════════════════════════════
+  PUSH BACKEND TO HUGGING FACE (not GitHub)
+═══════════════════════════════════════════════════════════════
+
+IMPORTANT:
+  - "git push" inside brain-mri-tumor-detector  → goes to GITHUB only
+  - "git push" inside hf-space-deploy           → goes to HUGGING FACE Space
+
+You already have 1 commit ready to push (from last deploy script run).
+
+───────────────────────────────────────────────────────────────
+STEP 1 — Get Hugging Face token (one time)
+───────────────────────────────────────────────────────────────
+
+Open: https://huggingface.co/settings/tokens
+  → New token
+  → Name: deploy
+  → Role: Write
+  → Create
+  → Copy token (starts with hf_...)
+
+───────────────────────────────────────────────────────────────
+STEP 2 — Push backend (use POWERSHELL, not CMD)
+───────────────────────────────────────────────────────────────
+
+Open PowerShell and paste ONE LINE AT A TIME:
+
+cd "C:\Users\cyto0\AppData\Local\Temp\cerebroai-backend-cyto0plasm"
+git push
+
+When prompted:
+  Username: cyto0plasm
+  Password: paste your hf_.... token (NOT your HF website password)
+
+If that folder is missing, use the project folder instead:
+
+cd "C:\Users\cyto0\.gemini\antigravity\scratch\brain-mri-tumor-detector"
+.\deploy-backend.ps1 -HfUsername cyto0plasm
+cd "C:\Users\cyto0\.gemini\antigravity\scratch\brain-mri-tumor-detector\hf-space-deploy"
+git push
+
+───────────────────────────────────────────────────────────────
+STEP 3 — Add secret on HUGGING FACE (not Vercel)
+───────────────────────────────────────────────────────────────
+
+Open: https://huggingface.co/spaces/cyto0plasm/cerebroai-backend/settings
+
+Scroll to: Repository secrets  →  New secret
+
+  Name:  HF_MODEL_REPO
+  Value: cyto0plasm/MRI_IMAGING_TOMUR_DETECTOR
+
+Save. Space will rebuild automatically.
+
+───────────────────────────────────────────────────────────────
+STEP 4 — Wait and test
+───────────────────────────────────────────────────────────────
+
+Open: https://huggingface.co/spaces/cyto0plasm/cerebroai-backend
+
+Wait until status = Running (green), not Error (red). ~5–10 min.
+
+Then open: https://cyto0plasm-cerebroai-backend.hf.space/
+
+Should show JSON with "status": "CerebroAI backend running"
+
+Then test: https://cerebroai-ashy.vercel.app/dashboard
+
+───────────────────────────────────────────────────────────────
+WHY CMD FAILED
+───────────────────────────────────────────────────────────────
+
+cd $env:TEMP\...  only works in PowerShell.
+In CMD use:  cd %TEMP%\cerebroai-backend-cyto0plasm

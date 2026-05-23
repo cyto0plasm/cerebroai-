@@ -1,9 +1,13 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{vue,js,jsx}",
   ],
+  corePlugins: {
+    directionality: true,
+  },
   theme: {
     extend: {
       colors: {

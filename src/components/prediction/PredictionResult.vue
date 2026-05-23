@@ -10,7 +10,9 @@
   </div>
 
   <!-- Result -->
-  <div v-else class="flex flex-col gap-4 animate-slide-up">
+  <div v-else data-tour="result" class="flex flex-col gap-4 animate-slide-up">
+
+    <BatchSummary :summary="store.batchSummary" />
 
     <!-- Diagnosis header -->
     <div
@@ -19,7 +21,7 @@
         scan.prediction === 'Tumor' ? 'bg-danger-50 border-danger-200' : 'bg-success-50 border-success-200',
       ]"
     >
-      <div class="flex items-start justify-between gap-4">
+      <div class="flex items-start justify-between gap-4 flex-wrap">
         <div class="flex items-center gap-3">
           <div
             :class="[
@@ -49,21 +51,31 @@
           </div>
         </div>
 
-        <div class="text-right shrink-0">
-          <p
-            class="text-2xl font-bold tabular-nums"
-            :class="scan.prediction === 'Tumor' ? 'text-danger-700' : 'text-success-700'"
+        <div class="flex flex-col items-end gap-2 shrink-0">
+          <div class="text-right">
+            <p
+              class="text-2xl font-bold tabular-nums"
+              :class="scan.prediction === 'Tumor' ? 'text-danger-700' : 'text-success-700'"
+            >
+              {{ Math.round(scan.confidence * 100) }}%
+            </p>
+            <p
+              class="text-xs font-medium"
+              :class="scan.prediction === 'Tumor' ? 'text-danger-400' : 'text-success-400'"
+            >
+              confidence
+            </p>
+          </div>
+          <button
+            type="button"
+            @click="printScanReport(scan)"
+            class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-surface-200 bg-white hover:bg-surface-50 focus:outline-none focus:ring-2 focus:ring-brand-500"
           >
-            {{ Math.round(scan.confidence * 100) }}%
-          </p>
-          <p
-            class="text-xs font-medium"
-            :class="scan.prediction === 'Tumor' ? 'text-danger-400' : 'text-success-400'"
-          >
-            confidence
-          </p>
+            Export / print report
+          </button>
         </div>
       </div>
+      <p v-if="scan.patientId" class="text-[11px] text-surface-500 mt-2 font-mono">Case ID: {{ scan.patientId }}</p>
 
       <div class="mt-4">
         <div
@@ -136,8 +148,12 @@
 import { ref, watch, onMounted, computed } from 'vue';
 import { Brain, AlertTriangle, CheckCircle, FileText, Info } from 'lucide-vue-next';
 import PredictionPlots from './PredictionPlots.vue';
+import BatchSummary from './BatchSummary.vue';
+import { usePredictionStore } from '../../stores/predictionStore';
+import { printScanReport } from '../../utils/exportReport';
 
 const props = defineProps({ scan: { type: Object, default: null } });
+const store = usePredictionStore();
 
 const hasAnyPlots = computed(() => {
   if (!props.scan) return false;

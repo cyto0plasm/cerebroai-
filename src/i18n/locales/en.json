@@ -1,0 +1,57 @@
+{
+  "common": {
+    "language": "English",
+    "cerebroAI": "CerebroAI",
+    "tagline": "Brain MRI Screening"
+  },
+  "nav": {
+    "analyze": "Analyze a scan",
+    "howItWorks": "How it works",
+    "dashboard": "Dashboard"
+  },
+  "hero": {
+    "title": "Advanced Brain MRI Screening",
+    "subtitle": "Powered by Deep Learning",
+    "description": "Experience the future of medical imaging analysis. Our state-of-the-art AI model delivers instant, precise tumor screening powered by ResNet18 deep learning architecture with Grad-CAM visualization.",
+    "features": "Research & education · Not for clinical diagnosis",
+    "cta": "Start Analysis",
+    "secondary": "Learn More",
+    "trustPoints": [
+      "Privacy-first: Scans processed locally",
+      "Instant results with confidence scoring",
+      "Grad-CAM activation visualization",
+      "No account required"
+    ]
+  },
+  "dashboard": {
+    "title": "MRI Screening Workspace",
+    "subtitle": "Upload one slice · review prediction, plots, and summary",
+    "uploadTitle": "Upload MRI Image",
+    "formats": "JPEG · PNG · TIFF · BMP · max 10 MB",
+    "scansSaved": "Saved in this browser only",
+    "inSession": "in session",
+    "flagged": "flagged",
+    "clear": "clear",
+    "avgConfidence": "Avg confidence"
+  },
+  "prediction": {
+    "tumorDetected": "Tumor detected",
+    "noTumorDetected": "No tumor detected",
+    "confidence": "confidence",
+    "prediction": "Prediction",
+    "summary": "Summary report",
+    "findings": "Findings",
+    "recommendation": "Recommendation",
+    "visualAnalysis": "Visual analysis",
+    "showPlots": "Show plots",
+    "hidePlots": "Hide plots",
+    "originalScan": "Original scan",
+    "activationMap": "Activation map",
+    "sideBySide": "Side-by-side",
+    "classProbabilities": "Class probabilities",
+    "input": "Input",
+    "activation": "Activation",
+    "tumor": "Tumor",
+    "noTumor": "No tumor"
+  }
+}

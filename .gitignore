@@ -7,3 +7,4 @@ dist/
 .DS_Store
 *.pth
 backend/mri_model.pth
+hf-space-deploy/
