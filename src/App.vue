@@ -24,9 +24,10 @@ onMounted(async () => {
 watch(
   () => auth.isMember,
   async (member, wasMember) => {
-    if (member && !wasMember) {
-      await store.hydrateWorkspace();
-    } else if (!member && wasMember) {
+    if (member) {
+      sessionStorage.setItem('axial_guest_ok', '1');
+      if (!wasMember) await store.hydrateWorkspace();
+    } else if (wasMember) {
       store.resetGuestSession();
     }
   }

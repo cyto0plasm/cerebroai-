@@ -8,6 +8,7 @@ export const useAuthStore = defineStore('auth', {
     mode: 'guest',
     loading: true,
     authError: null,
+    authNotice: null,
     cloudEnabled: isSupabaseConfigured,
   }),
 
@@ -26,29 +27,34 @@ export const useAuthStore = defineStore('auth', {
       }
 
       const { data } = await supabase.auth.getSession();
-      this.session = data.session;
-      this.user = data.session?.user ?? null;
-      this.mode = this.user ? 'member' : 'guest';
+      this.applySession(data.session);
       this.loading = false;
 
       supabase.auth.onAuthStateChange((_event, session) => {
-        this.session = session;
-        this.user = session?.user ?? null;
-        if (!session) {
-          this.mode = 'guest';
-        } else if (this.mode !== 'guest') {
-          this.mode = 'member';
-        }
+        this.applySession(session);
       });
+    },
+
+    applySession(session) {
+      this.session = session;
+      this.user = session?.user ?? null;
+      if (this.user) {
+        this.mode = 'member';
+        this.authError = null;
+      } else if (this.mode === 'member') {
+        this.mode = 'guest';
+      }
     },
 
     continueAsGuest() {
       this.mode = 'guest';
       this.authError = null;
+      this.authNotice = null;
     },
 
     async signIn(email, password) {
       this.authError = null;
+      this.authNotice = null;
       if (!supabase) {
         this.authError = 'Cloud workspace is not configured.';
         return false;
@@ -58,29 +64,46 @@ export const useAuthStore = defineStore('auth', {
         this.authError = error.message;
         return false;
       }
-      this.session = data.session;
-      this.user = data.user;
-      this.mode = 'member';
-      return true;
+      this.applySession(data.session);
+      return Boolean(data.session);
     },
 
     async signUp(email, password) {
       this.authError = null;
+      this.authNotice = null;
       if (!supabase) {
         this.authError = 'Cloud workspace is not configured.';
         return false;
       }
-      const { data, error } = await supabase.auth.signUp({ email, password });
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+        },
+      });
+
       if (error) {
         this.authError = error.message;
         return false;
       }
+
       if (data.session) {
-        this.session = data.session;
-        this.user = data.user;
-        this.mode = 'member';
+        this.applySession(data.session);
+        this.authNotice = 'Account created. You are signed in.';
+        return true;
       }
-      return true;
+
+      // Supabase email confirmation enabled — user exists but no session yet
+      if (data.user) {
+        this.authNotice =
+          'Account created. Open the confirmation link in your email, then sign in here.';
+        return false;
+      }
+
+      this.authError = 'Sign-up did not complete. Try again or use a different email.';
+      return false;
     },
 
     async signOut() {
@@ -88,6 +111,7 @@ export const useAuthStore = defineStore('auth', {
       this.user = null;
       this.session = null;
       this.mode = 'guest';
+      this.authNotice = null;
     },
   },
 });

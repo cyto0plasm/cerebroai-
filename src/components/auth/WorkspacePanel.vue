@@ -14,7 +14,8 @@
       <form v-if="view === 'signin'" class="flex flex-col gap-3" @submit.prevent="handleSignIn">
         <input v-model="email" type="email" required placeholder="Email" class="input-field" autocomplete="email" />
         <input v-model="password" type="password" required placeholder="Password" class="input-field" autocomplete="current-password" />
-        <p v-if="auth.authError" class="text-xs text-danger-600">{{ auth.authError }}</p>
+        <p v-if="auth.authError" class="text-xs text-danger-600" role="alert">{{ auth.authError }}</p>
+        <p v-if="auth.authNotice" class="text-xs text-brand-700 dark:text-brand-300 bg-brand-50 dark:bg-brand-950 rounded-lg px-3 py-2" role="status">{{ auth.authNotice }}</p>
         <BaseButton type="submit" variant="primary" class="w-full" :loading="busy">Sign in</BaseButton>
         <button type="button" class="text-xs text-brand-600 font-semibold" @click="view = 'signup'">Create account</button>
       </form>
@@ -22,7 +23,8 @@
       <form v-else-if="view === 'signup'" class="flex flex-col gap-3" @submit.prevent="handleSignUp">
         <input v-model="email" type="email" required placeholder="Email" class="input-field" />
         <input v-model="password" type="password" required minlength="8" placeholder="Password (8+ chars)" class="input-field" />
-        <p v-if="auth.authError" class="text-xs text-danger-600">{{ auth.authError }}</p>
+        <p v-if="auth.authError" class="text-xs text-danger-600" role="alert">{{ auth.authError }}</p>
+        <p v-if="auth.authNotice" class="text-xs text-brand-700 dark:text-brand-300 bg-brand-50 dark:bg-brand-950 rounded-lg px-3 py-2" role="status">{{ auth.authNotice }}</p>
         <BaseButton type="submit" variant="primary" class="w-full" :loading="busy">Create account</BaseButton>
         <button type="button" class="text-xs text-brand-600 font-semibold" @click="view = 'signin'">Already have an account</button>
       </form>
@@ -96,10 +98,12 @@ async function enterGuest() {
 
 async function handleSignIn() {
   busy.value = true;
+  auth.authNotice = null;
   const ok = await auth.signIn(email.value, password.value);
   busy.value = false;
   if (ok) {
     guestChosen.value = true;
+    sessionStorage.setItem('axial_guest_ok', '1');
     await store.hydrateWorkspace();
   }
 }
@@ -110,7 +114,10 @@ async function handleSignUp() {
   busy.value = false;
   if (ok) {
     guestChosen.value = true;
+    sessionStorage.setItem('axial_guest_ok', '1');
     await store.hydrateWorkspace();
+  } else if (auth.authNotice) {
+    view.value = 'signin';
   }
 }
 
