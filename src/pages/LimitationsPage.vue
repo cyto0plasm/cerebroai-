@@ -4,7 +4,7 @@
       Limitations &amp; intended use
     </h1>
     <p class="text-sm text-surface-500 mt-2 leading-relaxed">
-      Read before using CerebroAI in research, teaching, or clinical-adjacent workflows.
+      Read before using {{ CONFIG.APP_NAME }} in research, teaching, or clinical-adjacent workflows.
     </p>
 
     <div class="mt-8 flex flex-col gap-6 text-sm text-surface-700 dark:text-surface-300 leading-relaxed">
@@ -18,7 +18,7 @@
       <section class="rounded-xl border border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-900 p-5">
         <h2 class="text-base font-semibold text-surface-900 dark:text-surface-100 mb-2">Enterprise integrations</h2>
         <p>
-          PACS connectivity, hospital SSO, and EMR export are <strong>not available</strong> in this public demo.
+          PACS connectivity, hospital SSO, and EMR export are <strong>not available</strong> on this deployment.
           For institutional deployment, a separate integration project would be required.
         </p>
       </section>
@@ -34,6 +34,8 @@
 </template>
 
 <script setup>
+import { CONFIG } from '../config';
+
 const sections = [
   {
     title: 'Not a medical device',
@@ -55,9 +57,9 @@ const sections = [
   {
     title: 'Privacy & storage',
     items: [
-      'Images are sent to the analysis API for inference; this demo does not store them server-side.',
-      'History and audit logs live in your browser only (localStorage).',
-      'Optional case ID is stored locally with results — do not enter real patient identifiers in production demos.',
+      'Images are sent to the analysis API for inference; the service does not retain them after processing.',
+      'Guest history exists only for the current browser session. Members store studies in a private Supabase workspace.',
+      'Use anonymous case IDs only — never real patient identifiers.',
     ],
   },
   {
@@ -65,7 +67,7 @@ const sections = [
     items: [
       'Free-tier hosting may sleep; first request after idle can take ~30 seconds.',
       'Multi-slice mode uses majority vote — not a validated ensemble method.',
-      'Mock fallback runs only in local development when the API is offline.',
+      'Offline analysis is not available — a live API connection is required.',
     ],
   },
 ];

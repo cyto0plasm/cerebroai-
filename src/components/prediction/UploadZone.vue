@@ -105,7 +105,7 @@
             <button
               v-if="store.activeScan.status === 'scanning'"
               type="button"
-              @click.stop="cancelTelemetry"
+              @click.stop="cancelAnalysis"
               class="inline-flex items-center gap-1.5 px-4 py-2 bg-surface-100 text-xs font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
             >
               <Square class="w-3.5 h-3.5" /> Cancel
@@ -191,7 +191,7 @@ const triggerReset = () => {
   store.resetActiveScan();
 };
 
-const cancelTelemetry = () => {
+const cancelAnalysis = () => {
   predictionService.cancelPredict();
   store.resetActiveScan();
   slowRequest.value = false;
@@ -226,7 +226,6 @@ async function runSingle(file, preview, meta) {
         previewUrl: preview,
         prediction: res.prediction,
         confidence: res.confidence,
-        isMocked: res.isMocked || false,
         heatmap: res.heatmap || null,
         imageWidth: meta?.width,
         imageHeight: meta?.height,
@@ -263,7 +262,6 @@ async function runSeries() {
           previewUrl: item.previewUrl,
           prediction: res.prediction,
           confidence: res.confidence,
-          isMocked: res.isMocked || false,
           heatmap: res.heatmap || null,
           batchId,
           sliceIndex: i + 1,

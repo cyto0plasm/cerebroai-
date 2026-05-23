@@ -1,27 +1,18 @@
-/**
- * Application Configuration
- */
 const DEFAULT_PRODUCTION_API = 'https://cyto0plasm-cerebroai-backend.hf.space';
 
 function resolveApiBaseUrl() {
   const fromEnv = import.meta.env.VITE_API_BASE_URL?.trim();
-
   if (fromEnv && !fromEnv.includes('YOUR-HF') && !fromEnv.includes('YOUR_USERNAME')) {
     return fromEnv.replace(/\/$/, '');
   }
-
-  if (import.meta.env.PROD) {
-    return DEFAULT_PRODUCTION_API;
-  }
-
+  if (import.meta.env.PROD) return DEFAULT_PRODUCTION_API;
   return 'http://localhost:8000';
 }
 
 export const CONFIG = {
   API_BASE_URL: resolveApiBaseUrl(),
   API_TIMEOUT: 60000,
-  ENABLE_MOCK_FALLBACK: !import.meta.env.PROD,
-  MOCK_DELAY_MS: 1800,
+  ENABLE_OFFLINE_FALLBACK: false,
 
   MAX_FILE_SIZE_BYTES: 10 * 1024 * 1024,
   MIN_IMAGE_DIMENSION: 128,
@@ -35,9 +26,10 @@ export const CONFIG = {
   MODEL_DISPLAY: {
     architecture: 'ResNet18',
     inputSize: '224×224',
-    version: '1.2.0',
+    version: '2.0.0',
   },
 
-  APP_NAME: 'CerebroAI',
-  VERSION: '1.3.0',
+  APP_NAME: 'AxialMRI',
+  APP_TAGLINE: 'Axial slice screening workspace',
+  VERSION: '2.0.0',
 };

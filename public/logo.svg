@@ -1,20 +1,6 @@
-<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none">
-  <defs>
-    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#2563eb;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#0f172a;stop-opacity:1" />
-    </linearGradient>
-  </defs>
-  <circle cx="50" cy="50" r="45" stroke="url(#logoGrad)" stroke-width="2"/>
-  <path d="M 50 20 Q 70 25 75 45 Q 72 35 65 32 Q 60 30 50 30 Q 40 30 35 32 Q 28 35 25 45 Q 30 25 50 20" fill="#2563eb" opacity="0.1"/>
-  <circle cx="50" cy="50" r="3" fill="#2563eb"/>
-  <circle cx="40" cy="45" r="2.5" fill="#2563eb" opacity="0.7"/>
-  <circle cx="60" cy="45" r="2.5" fill="#2563eb" opacity="0.7"/>
-  <circle cx="45" cy="60" r="2.5" fill="#2563eb" opacity="0.7"/>
-  <circle cx="55" cy="60" r="2.5" fill="#2563eb" opacity="0.7"/>
-  <line x1="50" y1="50" x2="40" y2="45" stroke="#2563eb" stroke-width="1" opacity="0.5"/>
-  <line x1="50" y1="50" x2="60" y2="45" stroke="#2563eb" stroke-width="1" opacity="0.5"/>
-  <line x1="50" y1="50" x2="45" y2="60" stroke="#2563eb" stroke-width="1" opacity="0.5"/>
-  <line x1="50" y1="50" x2="55" y2="60" stroke="#2563eb" stroke-width="1" opacity="0.5"/>
-  <line x1="50" y1="20" x2="50" y2="35" stroke="#2563eb" stroke-width="1.5" opacity="0.6"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none" role="img" aria-label="AxialMRI">
+  <rect width="40" height="40" rx="10" fill="#173532"/>
+  <ellipse cx="20" cy="20" rx="12" ry="13" stroke="#72b8a8" stroke-width="1.75"/>
+  <line x1="5" y1="20" x2="35" y2="20" stroke="#c9a227" stroke-width="1.5" stroke-linecap="round"/>
+  <ellipse cx="20" cy="20" rx="5" ry="5.5" stroke="#d4ebe6" stroke-width="1.25"/>
 </svg>

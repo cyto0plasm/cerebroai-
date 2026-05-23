@@ -6,7 +6,7 @@ import apiClient, { cancelRequest } from '../api/client';
  */
 export const predictionService = {
   /**
-   * Submits an MRI file to the neural network for prediction telemetry
+   * Submits an MRI slice to the screening API
    * @param {File} file - The validated MRI image file
    * @returns {Promise<{ prediction: string, confidence: number }>}
    */

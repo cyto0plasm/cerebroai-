@@ -4,7 +4,7 @@
     v-if="!scan"
     class="bg-white rounded-xl border border-dashed border-surface-200 p-10 flex flex-col items-center justify-center text-center min-h-[200px]"
   >
-    <Brain class="w-8 h-8 text-surface-200 mb-3" />
+    <ScanLine class="w-8 h-8 text-surface-300 mb-3" />
     <p class="text-sm font-medium text-surface-400">Result will appear here</p>
     <p class="text-xs text-surface-300 mt-1">Upload a scan and click Run Analysis</p>
   </div>
@@ -90,22 +90,13 @@
         </div>
       </div>
 
-      <div
-        v-if="scan.isMocked"
-        class="mt-3 flex items-center gap-2 text-xs"
-        :class="scan.prediction === 'Tumor' ? 'text-danger-400' : 'text-success-400'"
-      >
-        <Info class="w-3.5 h-3.5 shrink-0" />
-        Simulated result — backend offline. Start the server for real predictions and plots.
-      </div>
     </div>
 
-    <!-- Collapsible real plots (hidden by default) -->
     <PredictionPlots v-if="hasAnyPlots" :scan="scan" />
 
     <div
-      v-else-if="!scan.isMocked"
-      class="rounded-xl border border-dashed border-surface-200 bg-surface-50 px-5 py-4 text-center"
+      v-else
+      class="panel px-5 py-4 text-center"
     >
       <p class="text-xs text-surface-500">
         Visual plots unavailable — the server did not return a heatmap for this scan.
@@ -146,7 +137,7 @@
 
 <script setup>
 import { ref, watch, onMounted, computed } from 'vue';
-import { Brain, AlertTriangle, CheckCircle, FileText, Info } from 'lucide-vue-next';
+import { ScanLine, AlertTriangle, CheckCircle, FileText } from 'lucide-vue-next';
 import PredictionPlots from './PredictionPlots.vue';
 import BatchSummary from './BatchSummary.vue';
 import { usePredictionStore } from '../../stores/predictionStore';

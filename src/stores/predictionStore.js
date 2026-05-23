@@ -1,27 +1,27 @@
 import { defineStore } from 'pinia';
 import { TUMOR_CLASSES } from '../constants';
-import { buildScanRecord, loadHistoryFromStorage, aggregateBatchPredictions } from '../utils/scanRecord';
+import { buildScanRecord, aggregateBatchPredictions } from '../utils/scanRecord';
 import { appendAuditEntry, clearAuditLog, loadAuditLog } from '../utils/auditLog';
+import { useAuthStore } from './authStore';
+import * as scanRepo from '../services/scanRepository';
+
+export { aggregateBatchPredictions };
 
 export const usePredictionStore = defineStore('prediction', {
   state: () => ({
-    history: loadHistoryFromStorage(),
+    history: [],
     selectedHistoryId: null,
     patientIdInput: '',
     uploadMode: 'single',
-    activeScan: {
-      status: 'idle',
-      progress: 0,
-      error: null,
-      result: null,
-    },
+    activeScan: { status: 'idle', progress: 0, error: null, result: null },
     batchSummary: null,
+    syncing: false,
   }),
 
   getters: {
-    currentInspectedScan: (state) => {
+    currentInspectedScan(state) {
       if (state.selectedHistoryId) {
-        const fromHistory = state.history.find(item => item.id === state.selectedHistoryId);
+        const fromHistory = state.history.find((item) => item.id === state.selectedHistoryId);
         if (fromHistory) return fromHistory;
       }
       if (state.activeScan.status === 'success' && state.activeScan.result) {
@@ -30,9 +30,9 @@ export const usePredictionStore = defineStore('prediction', {
       return null;
     },
 
-    stats: (state) => {
+    stats(state) {
       const total = state.history.length;
-      const tumors = state.history.filter(item => item.prediction === TUMOR_CLASSES.TUMOR).length;
+      const tumors = state.history.filter((item) => item.prediction === TUMOR_CLASSES.TUMOR).length;
       const clearScans = total - tumors;
       const avgConfidence =
         total > 0
@@ -42,27 +42,79 @@ export const usePredictionStore = defineStore('prediction', {
     },
 
     auditLog: () => loadAuditLog(),
+    canPersist() {
+      const auth = useAuthStore();
+      return auth.isMember;
+    },
   },
 
   actions: {
-    addHistoryItem(scanResult) {
+    async hydrateWorkspace() {
+      const auth = useAuthStore();
+      this.history = [];
+      this.selectedHistoryId = null;
+
+      if (auth.isMember && auth.user) {
+        this.syncing = true;
+        try {
+          this.history = await scanRepo.fetchUserScans(auth.user.id);
+          this.selectedHistoryId = this.history[0]?.id || null;
+        } catch (e) {
+          console.error('[AxialMRI] Failed to load workspace', e);
+        } finally {
+          this.syncing = false;
+        }
+      }
+    },
+
+    async addHistoryItem(scanResult) {
       const newScan = buildScanRecord({
         ...scanResult,
         patientId: scanResult.patientId || this.patientIdInput,
       });
+
       this.history.unshift(newScan);
       this.selectedHistoryId = newScan.id;
-      this.saveToStorage();
-      appendAuditEntry({
-        action: 'analysis_complete',
-        scanId: newScan.id,
-        fileName: newScan.fileName,
-        prediction: newScan.prediction,
-        confidence: newScan.confidence,
-        patientId: newScan.patientId,
-        batchId: newScan.batchId,
-      });
+
+      const auth = useAuthStore();
+      if (auth.isMember && auth.user) {
+        try {
+          await scanRepo.upsertScan(auth.user.id, newScan);
+        } catch (e) {
+          console.error('[AxialMRI] Cloud save failed', e);
+        }
+      }
+
+      if (auth.isMember) {
+        appendAuditEntry({
+          action: 'analysis_complete',
+          scanId: newScan.id,
+          displayName: newScan.displayName,
+          prediction: newScan.prediction,
+        });
+      }
+
       return newScan;
+    },
+
+    async renameScan(id, displayName) {
+      const name = displayName.trim();
+      if (!name) return;
+
+      const item = this.history.find((h) => h.id === id);
+      if (!item) return;
+
+      item.displayName = name;
+      item.fileName = name;
+
+      const auth = useAuthStore();
+      if (auth.isMember && auth.user) {
+        await scanRepo.updateScanName(auth.user.id, id, name);
+      }
+
+      if (this.activeScan.result?.id === id) {
+        this.activeScan.result = { ...this.activeScan.result, displayName: name, fileName: name };
+      }
     },
 
     setBatchSummary(summary) {
@@ -88,45 +140,63 @@ export const usePredictionStore = defineStore('prediction', {
       this.batchSummary = null;
     },
 
-    deleteHistoryItem(id) {
-      this.history = this.history.filter(item => item.id !== id);
+    async deleteHistoryItem(id) {
+      const auth = useAuthStore();
+      if (auth.isMember && auth.user) {
+        await scanRepo.deleteScan(auth.user.id, id);
+      }
+      this.history = this.history.filter((item) => item.id !== id);
       if (this.selectedHistoryId === id) {
         this.selectedHistoryId = this.history[0]?.id || null;
       }
-      this.saveToStorage();
-      appendAuditEntry({ action: 'scan_deleted', scanId: id });
     },
 
-    clearAllHistory() {
+    async clearAllHistory() {
+      const auth = useAuthStore();
+      if (auth.isMember && auth.user) {
+        await scanRepo.clearUserScans(auth.user.id);
+      }
       this.history = [];
       this.selectedHistoryId = null;
-      this.saveToStorage();
-      appendAuditEntry({ action: 'history_cleared' });
     },
 
-    importSession(history, merge = true) {
+    async importSession(history, merge = true) {
+      const auth = useAuthStore();
+      if (!auth.isMember) return;
+
       const cleaned = (history || []).filter(
-        item => item?.id && item?.prediction && item?.confidence != null
+        (item) => item?.id && item?.prediction && item?.confidence != null
       );
+
       if (merge) {
-        const ids = new Set(this.history.map(h => h.id));
-        cleaned.forEach(item => {
-          if (!ids.has(item.id)) this.history.push(item);
-        });
+        const ids = new Set(this.history.map((h) => h.id));
+        for (const item of cleaned) {
+          if (!ids.has(item.id)) {
+            this.history.push(item);
+            if (auth.user) await scanRepo.upsertScan(auth.user.id, item);
+          }
+        }
       } else {
         this.history = cleaned;
+        if (auth.user) {
+          await scanRepo.clearUserScans(auth.user.id);
+          for (const item of cleaned) {
+            await scanRepo.upsertScan(auth.user.id, item);
+          }
+        }
       }
       this.selectedHistoryId = this.history[0]?.id || null;
-      this.saveToStorage();
-      appendAuditEntry({ action: 'session_imported', count: cleaned.length });
-    },
-
-    saveToStorage() {
-      localStorage.setItem('cerebro_scan_history', JSON.stringify(this.history));
     },
 
     purgeAuditLog() {
       clearAuditLog();
+    },
+
+    resetGuestSession() {
+      this.history = [];
+      this.selectedHistoryId = null;
+      this.resetActiveScan();
+      this.batchSummary = null;
     },
   },
 });

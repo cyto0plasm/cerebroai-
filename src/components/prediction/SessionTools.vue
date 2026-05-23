@@ -52,7 +52,7 @@ function downloadAudit() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `cerebroai-audit-${Date.now()}.json`;
+  a.download = `axialmri-audit-${Date.now()}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }

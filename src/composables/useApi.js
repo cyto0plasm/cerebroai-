@@ -39,7 +39,7 @@ export function useApi(apiCallFn) {
         return null;
       }
       
-      error.value = err?.message || 'A critical telemetry error occurred during deep scanning.';
+      error.value = err?.message || 'Analysis request failed.';
       throw err;
     } finally {
       loading.value = false;

@@ -1,83 +1,69 @@
-/**
- * Application Constants and Enums
- */
-
 export const PREDICTION_STATUS = {
   IDLE: 'idle',
   VALIDATING: 'validating',
   UPLOADING: 'uploading',
-  SCANNING: 'scanning', // AI telemetry scanning phase
+  SCANNING: 'scanning',
   SUCCESS: 'success',
-  ERROR: 'error'
+  ERROR: 'error',
 };
 
 export const TUMOR_CLASSES = {
   TUMOR: 'Tumor',
-  NO_TUMOR: 'No Tumor'
+  NO_TUMOR: 'No Tumor',
 };
 
-export const MOCK_DIAGNOSTIC_REPORTS = {
+export const CLINICAL_REPORTS = {
   HIGH_CONFIDENCE_TUMOR: {
-    severity: 'High Alert',
-    recommendation: 'Immediate neurosurgical consultation recommended. Schedule high-resolution contrast-enhanced Brain MRI (T1w + Gadolinium) for precision staging and tumor volumetric mapping.',
-    findings: 'Abnormal hyperintense region localized in the cerebral cortex. Secondary mass effect observed on the lateral ventricles. AI-computed morphology suggests glioma or meningioma pathogrouping.'
+    severity: 'Elevated',
+    recommendation:
+      'Correlate with full MRI series and clinical history. Consider specialist review and contrast-enhanced imaging if indicated.',
+    findings:
+      'Hyperintense region identified in cortical tissue with features suggestive of a space-occupying process. Mass effect should be evaluated on additional sequences.',
   },
   LOW_CONFIDENCE_TUMOR: {
-    severity: 'Moderate Alert',
-    recommendation: 'Schedule a secondary diagnostic run. Clinical evaluation recommended with focus on anatomical asymmetry in the temporal lobe. Consider MRS (Magnetic Resonance Spectroscopy).',
-    findings: 'Subtle high-signal-intensity boundary noted in the parenchymal region. Minimal structural shift; boundary margins are diffuse. Telemetry confidence requires clinical correlation.'
+    severity: 'Review',
+    recommendation:
+      'Borderline screening result. Repeat slice selection or secondary review recommended before any clinical action.',
+    findings:
+      'Subtle signal alteration at the parenchymal margin. Findings are indeterminate at this confidence level.',
   },
   NO_TUMOR: {
-    severity: 'Normal Telemetry',
-    recommendation: 'No action required under standard neuro-oncological criteria. Schedule regular periodic follow-ups for diagnostic profiling as clinically indicated.',
-    findings: 'Parenchyma, cerebral hemispheres, and sulci are within normal anatomical parameters. Mass margins are flat and normal. Ventricles are symmetric, with no mass effect detected.'
-  }
+    severity: 'Within screening limits',
+    recommendation:
+      'No screening flag on this slice. Continue standard care pathways as clinically appropriate.',
+    findings:
+      'No focal abnormality flagged on this axial slice. Ventricular symmetry appears preserved within model sensitivity.',
+  },
 };
 
 export const WORKFLOW_STEPS = [
-  {
-    phase: '01',
-    title: 'Pre-Processing & Denoising',
-    desc: 'The system strips non-brain skull pixels, normalizes slice intensity, and applies anisotropic diffusion filtering to eliminate radiofrequency noise.'
-  },
-  {
-    phase: '02',
-    title: 'Multi-Modal Segmentation',
-    desc: 'Dense neural layers scan individual 2D MRI axial slices, executing pixel-by-pixel tissue classification across gray matter, white matter, and lesion structures.'
-  },
-  {
-    phase: '03',
-    title: 'Deep Feature Extraction',
-    desc: 'Convolutional layers extract morphological, spatial, and textural vectors to differentiate benign masses from infiltrative malignant glioma boundaries.'
-  },
-  {
-    phase: '04',
-    title: 'Confidence Telemetry',
-    desc: 'The classification engine processes vector layers via Softmax, producing a final tumor diagnosis and corresponding volumetric confidence parameters.'
-  }
+  { phase: '01', title: 'Prepare slice', desc: 'Select a single axial brain MRI slice. DICOM files are converted automatically.' },
+  { phase: '02', title: 'Run screening', desc: 'ResNet18 classifier returns a binary screening label with confidence.' },
+  { phase: '03', title: 'Review maps', desc: 'Grad-CAM highlights regions that influenced the model output on this slice.' },
+  { phase: '04', title: 'Archive', desc: 'Signed-in users store results in a private workspace. Guests work in a temporary session.' },
 ];
 
-export const BENCHMARKS = [
-  { metric: '98.4%', label: 'Classification Accuracy', subText: 'Validated on 10k+ verified MRIs' },
-  { metric: '< 450ms', label: 'Average Telemetry Speed', subText: 'GPU-accelerated parallel processing' },
-  { metric: '99.1%', label: 'Sensitivity / Recall', subText: 'Extremely low false negative threshold' },
-  { metric: '42+', label: 'Hospital Clusters Synced', subText: 'Real-time telemetry networks active' }
+export const CAPABILITIES = [
+  { metric: '2D slice', label: 'Input format', subText: 'Axial MRI · JPEG · PNG · DICOM' },
+  { metric: 'Grad-CAM', label: 'Visual review', subText: 'Region-level influence map' },
+  { metric: 'Private', label: 'Member workspace', subText: 'Encrypted account storage' },
+  { metric: 'Guest', label: 'Try without account', subText: 'Session-only · no cloud save' },
 ];
 
 export const CORE_FEATURES = [
   {
-    id: 'deep-telemetry',
-    title: 'Anatomical Segmentation',
-    description: 'Automatic isolation of suspicious cellular structures utilizing high-density voxel layers for maximum spatial localization.'
+    id: 'screening',
+    title: 'Slice screening',
+    description: 'Upload one axial slice and receive a structured screening result with confidence and summary text.',
   },
   {
-    id: 'speed',
-    title: 'GPU Parallel Scanning',
-    description: 'Runs deep convolutional neural models in sub-second times, bypassing standard manual clinical triage queues.'
+    id: 'maps',
+    title: 'Activation maps',
+    description: 'Inspect original input, Grad-CAM overlay, and side-by-side comparison in a dedicated plot panel.',
   },
   {
-    id: 'history',
-    title: 'Dynamic Scan Tracking',
-    description: 'Keeps clinical records locally isolated, allowing instant historical telemetry analysis and side-by-side diagnostic comparison.'
-  }
+    id: 'workspace',
+    title: 'Personal workspace',
+    description: 'Rename studies, compare past slices, and export reports when signed in. Guests use a temporary session.',
+  },
 ];
