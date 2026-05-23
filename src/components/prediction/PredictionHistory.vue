@@ -47,9 +47,15 @@
         <!-- Info -->
         <div class="flex-1 min-w-0">
           <p class="text-xs font-semibold text-surface-800 truncate">{{ item.fileName }}</p>
-          <div class="flex items-center gap-1.5 mt-0.5">
+          <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
             <span :class="['w-1.5 h-1.5 rounded-full shrink-0', item.prediction === 'Tumor' ? 'bg-danger-500' : 'bg-success-500']"></span>
             <span class="text-[11px] text-surface-400">{{ item.prediction }} · {{ Math.round(item.confidence * 100) }}%</span>
+            <span
+              v-if="item.heatmap || item.previewUrl"
+              class="text-[10px] font-medium text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded"
+            >
+              plots
+            </span>
           </div>
         </div>
 

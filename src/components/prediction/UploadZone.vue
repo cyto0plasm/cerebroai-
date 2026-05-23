@@ -160,23 +160,18 @@ const submitScan = async () => {
   try {
     const res = await predictionService.predict(selectedFile.value);
     if (res) {
-      clearTimeout(slowTimer); slowRequest.value = false;
-      store.updateActiveScan({ status: 'success', progress: 100, result: {
-        ...res,
-        id: `active-${Date.now()}`,
-        fileName: selectedFile.value.name,
-        fileSize: selectedFile.value.size,
-        heatmap: res.heatmap || null
-      } });
-      store.addHistoryItem({
+      clearTimeout(slowTimer);
+      slowRequest.value = false;
+      const record = store.addHistoryItem({
         fileName: selectedFile.value.name,
         fileSize: selectedFile.value.size,
         previewUrl: previewUrl.value,
         prediction: res.prediction,
         confidence: res.confidence,
         isMocked: res.isMocked || false,
-        heatmap: res.heatmap || null
+        heatmap: res.heatmap || null,
       });
+      store.updateActiveScan({ status: 'success', progress: 100, result: record });
     }
   } catch (err) {
     clearTimeout(slowTimer); slowRequest.value = false;
