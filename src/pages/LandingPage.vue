@@ -11,12 +11,12 @@
         <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">
           Ready to analyze a scan?
         </h2>
-        <p class="text-brand-200 text-sm max-w-sm leading-relaxed">
-          No account needed. No data leaves your machine. Just upload and get a result.
+        <p class="text-brand-200 text-sm max-w-md leading-relaxed">
+          No account required. Upload an MRI slice, run the analysis, and review your result and heatmap in the dashboard.
         </p>
         <router-link to="/dashboard">
           <button class="inline-flex items-center gap-2 px-6 py-3 bg-white text-brand-700 text-sm font-bold rounded-lg hover:bg-brand-50 transition-colors">
-            Open Scanner
+            Analyze a scan
             <ArrowRight class="w-4 h-4" />
           </button>
         </router-link>
