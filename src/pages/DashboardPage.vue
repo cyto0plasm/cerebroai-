@@ -3,15 +3,17 @@
 
     <!-- Top bar -->
     <div class="bg-white border-b border-surface-200 px-4 sm:px-6 lg:px-8 py-4">
-      <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
         <div>
-          <h1 class="text-base font-bold text-surface-900">MRI Analysis</h1>
-          <p class="text-xs text-surface-400 mt-0.5">Upload a scan · get an instant AI result</p>
+          <h1 class="text-base font-bold text-surface-900">MRI screening workspace</h1>
+          <p class="text-xs text-surface-400 mt-0.5">
+            Upload one slice · review prediction, plots, and summary
+          </p>
         </div>
-        <div class="flex items-center gap-3">
+        <div v-if="store.stats.total > 0" class="flex items-center gap-3">
           <div class="hidden sm:flex items-center gap-4 text-xs text-surface-500 border-r border-surface-200 pr-4">
-            <span><span class="font-bold text-surface-900">{{ store.stats.total }}</span> scans</span>
-            <span><span class="font-bold text-danger-500">{{ store.stats.tumors }}</span> positive</span>
+            <span><span class="font-bold text-surface-900">{{ store.stats.total }}</span> in session</span>
+            <span><span class="font-bold text-danger-500">{{ store.stats.tumors }}</span> flagged</span>
             <span><span class="font-bold text-success-600">{{ store.stats.clearScans }}</span> clear</span>
           </div>
           <div v-if="store.stats.avgConfidence > 0" class="text-xs text-surface-500">
@@ -24,17 +26,17 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-        <!-- LEFT COLUMN: Upload + Result -->
         <div class="lg:col-span-8 flex flex-col gap-5">
 
-          <!-- Upload + preview in one card -->
+          <DashboardGuidelines v-if="store.history.length === 0" />
+
           <div class="bg-white rounded-xl border border-surface-200 shadow-card overflow-hidden">
             <div class="px-5 py-4 border-b border-surface-100 flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <div class="w-6 h-6 rounded-md bg-brand-50 flex items-center justify-center">
                   <Upload class="w-3.5 h-3.5 text-brand-600" />
                 </div>
-                <span class="text-sm font-semibold text-surface-900">Upload Scan</span>
+                <span class="text-sm font-semibold text-surface-900">Upload MRI image</span>
               </div>
               <span class="text-xs text-surface-400">JPEG · PNG · TIFF · BMP · max 10 MB</span>
             </div>
@@ -43,11 +45,11 @@
             </div>
           </div>
 
-          <!-- Result -->
+          <InterpretationGuide v-if="store.currentInspectedScan" />
+
           <PredictionResult :scan="store.currentInspectedScan" />
         </div>
 
-        <!-- RIGHT COLUMN: History -->
         <div class="lg:col-span-4">
           <div class="bg-white rounded-xl border border-surface-200 shadow-card sticky top-20">
             <div class="px-5 py-4 border-b border-surface-100 flex items-center justify-between">
@@ -55,8 +57,11 @@
                 <div class="w-6 h-6 rounded-md bg-surface-100 flex items-center justify-center">
                   <ClipboardList class="w-3.5 h-3.5 text-surface-500" />
                 </div>
-                <span class="text-sm font-semibold text-surface-900">History</span>
-                <span class="text-xs font-semibold bg-surface-100 text-surface-500 px-2 py-0.5 rounded-full">
+                <div>
+                  <span class="text-sm font-semibold text-surface-900">Your scans</span>
+                  <p class="text-[10px] text-surface-400">Saved in this browser only</p>
+                </div>
+                <span class="text-xs font-semibold bg-surface-100 text-surface-500 px-2 py-0.5 rounded-full ml-1">
                   {{ store.history.length }}
                 </span>
               </div>
@@ -85,6 +90,8 @@ import { usePredictionStore } from '../stores/predictionStore';
 import UploadZone from '../components/prediction/UploadZone.vue';
 import PredictionResult from '../components/prediction/PredictionResult.vue';
 import PredictionHistory from '../components/prediction/PredictionHistory.vue';
+import DashboardGuidelines from '../components/prediction/DashboardGuidelines.vue';
+import InterpretationGuide from '../components/prediction/InterpretationGuide.vue';
 
 const store = usePredictionStore();
 </script>

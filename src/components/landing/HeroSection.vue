@@ -30,29 +30,7 @@
         <!-- Left: message -->
         <div class="flex flex-col gap-6 max-w-xl">
 
-          <!-- Logo lockup -->
-          <div class="flex items-center gap-3">
-            <div
-              class="w-10 h-10 rounded-xl bg-surface-900 flex items-center justify-center shrink-0 shadow-card"
-              aria-hidden="true"
-            >
-              <svg viewBox="0 0 40 40" class="w-6 h-6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="20" cy="20" r="14" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="3 2" opacity="0.7" />
-                <circle cx="20" cy="20" r="9" stroke="#e2e8f0" stroke-width="1.5" />
-                <path
-                  d="M20 11c-3.2 2.8-4.8 6.2-4.8 10.2 0 2.6 1 5 2.6 6.8M20 11c3.2 2.8 4.8 6.2 4.8 10.2 0 2.6-1 5-2.6 6.8"
-                  stroke="#94a3b8"
-                  stroke-width="1.25"
-                  stroke-linecap="round"
-                />
-                <circle cx="20" cy="20" r="2" fill="#38bdf8" />
-              </svg>
-            </div>
-            <div>
-              <p class="text-sm font-bold text-surface-900 tracking-tight leading-none">CerebroAI</p>
-              <p class="text-[11px] text-surface-500 mt-0.5">Brain MRI tumor screening</p>
-            </div>
-          </div>
+          <AppLogo :link="false" size="lg" show-tagline />
 
           <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-surface-200 text-surface-600 text-xs font-medium w-fit shadow-card">
             <ScanLine class="w-3.5 h-3.5 text-brand-600" />
@@ -220,6 +198,7 @@
 
 <script setup>
 import { ArrowRight, Check, AlertTriangle, ScanLine, Layers } from 'lucide-vue-next';
+import AppLogo from '../ui/AppLogo.vue';
 
 const steps = [
   { label: 'Upload', hint: 'JPEG, PNG, TIFF, BMP' },

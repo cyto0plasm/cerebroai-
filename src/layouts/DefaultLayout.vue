@@ -5,15 +5,7 @@
     <header class="sticky top-0 z-40 bg-white border-b border-surface-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
 
-        <!-- Logo -->
-        <router-link to="/" class="flex items-center gap-2.5 focus:outline-none">
-          <div class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center">
-            <BrainCircuit class="w-4.5 h-4.5 text-white" style="width:18px;height:18px" />
-          </div>
-          <span class="font-bold text-lg text-surface-900 tracking-tight">
-            Cerebro<span class="text-brand-600">AI</span>
-          </span>
-        </router-link>
+        <AppLogo to="/" size="md" />
 
         <!-- Desktop Nav -->
         <nav class="hidden md:flex items-center gap-1">
@@ -41,7 +33,7 @@
           </div>
           <router-link to="/dashboard">
             <BaseButton variant="primary" size="sm">
-              Open Scanner
+              Analyze a scan
               <ArrowRight class="w-3.5 h-3.5" />
             </BaseButton>
           </router-link>
@@ -70,7 +62,7 @@
         <div class="pt-3 mt-1 border-t border-surface-100">
           <router-link to="/dashboard" @click="isMobileMenuOpen = false">
             <BaseButton variant="primary" size="sm" class="w-full">
-              Open Scanner
+              Analyze a scan
             </BaseButton>
           </router-link>
         </div>
@@ -99,12 +91,7 @@
     <footer class="bg-white border-t border-surface-200 py-10 px-4 sm:px-6 lg:px-8 mt-auto">
       <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
         <div class="flex flex-col gap-1.5">
-          <div class="flex items-center gap-2">
-            <div class="w-6 h-6 rounded-md bg-brand-600 flex items-center justify-center">
-              <BrainCircuit class="text-white" style="width:13px;height:13px" />
-            </div>
-            <span class="font-semibold text-sm text-surface-900">CerebroAI</span>
-          </div>
+          <AppLogo :link="false" size="sm" />
           <p class="text-xs text-surface-400 max-w-xs">
             AI-powered brain MRI tumor detection. For research and educational use only.
           </p>
@@ -133,8 +120,9 @@
 <script setup>
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
-import { BrainCircuit, ArrowRight, Menu, X } from 'lucide-vue-next';
+import { ArrowRight, Menu, X } from 'lucide-vue-next';
 import BaseButton from '../components/ui/BaseButton.vue';
+import AppLogo from '../components/ui/AppLogo.vue';
 
 const route = useRoute();
 const isMobileMenuOpen = ref(false);
