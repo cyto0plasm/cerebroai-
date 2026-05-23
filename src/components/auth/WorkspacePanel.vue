@@ -38,8 +38,8 @@
         </p>
       </div>
 
-      <p v-if="!auth.cloudEnabled" class="text-xs text-warning-600 bg-warning-50 dark:bg-warning-500/10 rounded-lg px-3 py-2">
-        Cloud accounts are not configured on this deployment. Use guest mode or add Supabase keys.
+      <p v-if="!auth.cloudEnabled" class="text-xs text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800 rounded-lg px-3 py-2 leading-relaxed">
+        {{ auth.configHint || 'Cloud workspace is not configured. Add Supabase keys to .env.local and restart the dev server, or use Continue as guest.' }}
       </p>
     </div>
   </div>
@@ -67,6 +67,11 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { UserRound, ShieldCheck } from 'lucide-vue-next';
+import {
+  isGuestSessionChosen,
+  markGuestSessionChosen,
+  clearGuestSessionChoice,
+} from '../../utils/guestSession';
 import { useAuthStore } from '../../stores/authStore';
 import { usePredictionStore } from '../../stores/predictionStore';
 import AppLogo from '../ui/AppLogo.vue';
@@ -83,7 +88,7 @@ const view = ref('signin');
 const email = ref('');
 const password = ref('');
 const busy = ref(false);
-const guestChosen = ref(sessionStorage.getItem('axial_guest_ok') === '1');
+const guestChosen = ref(isGuestSessionChosen());
 
 const showGate = computed(
   () => props.gate && !auth.loading && auth.isGuest && !guestChosen.value
@@ -91,7 +96,7 @@ const showGate = computed(
 
 async function enterGuest() {
   auth.continueAsGuest();
-  sessionStorage.setItem('axial_guest_ok', '1');
+  markGuestSessionChosen();
   guestChosen.value = true;
   store.resetGuestSession();
 }
@@ -103,7 +108,7 @@ async function handleSignIn() {
   busy.value = false;
   if (ok) {
     guestChosen.value = true;
-    sessionStorage.setItem('axial_guest_ok', '1');
+    markGuestSessionChosen();
     await store.hydrateWorkspace();
   }
 }
@@ -114,7 +119,7 @@ async function handleSignUp() {
   busy.value = false;
   if (ok) {
     guestChosen.value = true;
-    sessionStorage.setItem('axial_guest_ok', '1');
+    markGuestSessionChosen();
     await store.hydrateWorkspace();
   } else if (auth.authNotice) {
     view.value = 'signin';
@@ -123,7 +128,7 @@ async function handleSignUp() {
 
 async function handleSignOut() {
   await auth.signOut();
-  sessionStorage.removeItem('axial_guest_ok');
+  clearGuestSessionChoice();
   guestChosen.value = false;
   store.resetGuestSession();
 }

@@ -7,7 +7,7 @@
       <li>· Screening and plot review are fully available</li>
     </ul>
     <router-link to="/dashboard">
-      <BaseButton variant="soft" size="sm" class="w-full" @click="sessionStorage.removeItem('axial_guest_ok')">
+      <BaseButton variant="soft" size="sm" class="w-full" @click="clearGuestSessionChoice()">
         Sign in for full workspace
       </BaseButton>
     </router-link>
@@ -15,5 +15,6 @@
 </template>
 
 <script setup>
+import { clearGuestSessionChoice } from '../../utils/guestSession';
 import BaseButton from '../ui/BaseButton.vue';
 </script>

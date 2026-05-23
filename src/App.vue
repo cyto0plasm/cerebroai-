@@ -7,7 +7,7 @@ import { watch, onMounted } from 'vue';
 import DefaultLayout from './layouts/DefaultLayout.vue';
 import { useAppStore } from './stores/appStore';
 import { useAuthStore } from './stores/authStore';
-import { usePredictionStore } from './stores/predictionStore';
+import { markGuestSessionChosen } from './utils/guestSession';
 
 const app = useAppStore();
 const auth = useAuthStore();
@@ -25,7 +25,7 @@ watch(
   () => auth.isMember,
   async (member, wasMember) => {
     if (member) {
-      sessionStorage.setItem('axial_guest_ok', '1');
+      markGuestSessionChosen();
       if (!wasMember) await store.hydrateWorkspace();
     } else if (wasMember) {
       store.resetGuestSession();

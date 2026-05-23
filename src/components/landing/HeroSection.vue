@@ -8,15 +8,15 @@
       </div>
 
       <p class="chip bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 text-surface-600 dark:text-surface-400 mx-auto mb-6">
-        Axial slice screening · Grad-CAM review
+        Brain MRI screening · Grad-CAM review
       </p>
 
       <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-surface-900 dark:text-surface-50 tracking-tight leading-[1.1] max-w-3xl mx-auto">
-        Screen brain MRI slices with clarity
+        Advanced brain MRI screening
       </h1>
 
       <p class="mt-5 text-base sm:text-lg text-surface-600 dark:text-surface-400 max-w-2xl mx-auto leading-relaxed">
-        Upload an axial slice, receive a structured screening result, and inspect activation maps.
+        Upload a slice, receive a structured screening result, and inspect activation maps.
         Members keep a private workspace; guests work in a temporary session.
       </p>
 

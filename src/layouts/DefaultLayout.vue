@@ -80,7 +80,7 @@
           <div class="flex flex-col gap-2">
             <span class="text-xs font-semibold uppercase tracking-wide text-surface-600 dark:text-surface-400">App</span>
             <span class="text-xs">v{{ CONFIG.VERSION }}</span>
-            <button type="button" class="text-xs text-left hover:text-brand-600" @click="app.resetOnboarding(); sessionStorage.removeItem('axial_guest_ok')">
+            <button type="button" class="text-xs text-left hover:text-brand-600" @click="app.resetOnboarding(); clearGuestSessionChoice()">
               Replay introduction
             </button>
           </div>
@@ -103,6 +103,7 @@ import BackendStatus from '../components/layout/BackendStatus.vue';
 import ThemeToggle from '../components/layout/ThemeToggle.vue';
 import { useAppStore } from '../stores/appStore';
 import { CONFIG } from '../config';
+import { clearGuestSessionChoice } from '../utils/guestSession';
 
 const route = useRoute();
 const app = useAppStore();

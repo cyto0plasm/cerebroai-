@@ -29,7 +29,7 @@ export const CONFIG = {
     version: '2.0.0',
   },
 
-  APP_NAME: 'AxialMRI',
-  APP_TAGLINE: 'Axial slice screening workspace',
+  APP_NAME: 'CerebroAI',
+  APP_TAGLINE: 'Brain MRI screening workspace',
   VERSION: '2.0.0',
 };

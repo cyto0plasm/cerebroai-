@@ -1,6 +1,6 @@
-# AxialMRI
+# CerebroAI
 
-Axial brain MRI slice screening workspace with Grad-CAM review, member cloud storage, and guest sessions.
+Brain MRI tumor screening workspace with Grad-CAM review, member cloud storage, and guest sessions.
 
 ## Local development
 

@@ -60,7 +60,7 @@ export const usePredictionStore = defineStore('prediction', {
           this.history = await scanRepo.fetchUserScans(auth.user.id);
           this.selectedHistoryId = this.history[0]?.id || null;
         } catch (e) {
-          console.error('[AxialMRI] Failed to load workspace', e);
+          console.error('[CerebroAI] Failed to load workspace', e);
         } finally {
           this.syncing = false;
         }
@@ -81,7 +81,7 @@ export const usePredictionStore = defineStore('prediction', {
         try {
           await scanRepo.upsertScan(auth.user.id, newScan);
         } catch (e) {
-          console.error('[AxialMRI] Cloud save failed', e);
+          console.error('[CerebroAI] Cloud save failed', e);
         }
       }
 

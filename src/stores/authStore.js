@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { getSupabase, isSupabaseConfigured, getSupabaseConfigStatus } from '../lib/supabase';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -9,10 +9,11 @@ export const useAuthStore = defineStore('auth', {
     loading: true,
     authError: null,
     authNotice: null,
-    cloudEnabled: isSupabaseConfigured,
   }),
 
   getters: {
+    cloudEnabled: () => isSupabaseConfigured(),
+    configHint: () => getSupabaseConfigStatus(),
     isGuest: (state) => state.mode === 'guest' || !state.user,
     isMember: (state) => state.mode === 'member' && !!state.user,
     userEmail: (state) => state.user?.email ?? null,
@@ -20,17 +21,18 @@ export const useAuthStore = defineStore('auth', {
 
   actions: {
     async init() {
-      if (!isSupabaseConfigured || !supabase) {
+      const sb = getSupabase();
+      if (!sb) {
         this.loading = false;
         this.mode = 'guest';
         return;
       }
 
-      const { data } = await supabase.auth.getSession();
+      const { data } = await sb.auth.getSession();
       this.applySession(data.session);
       this.loading = false;
 
-      supabase.auth.onAuthStateChange((_event, session) => {
+      sb.auth.onAuthStateChange((_event, session) => {
         this.applySession(session);
       });
     },
@@ -55,11 +57,12 @@ export const useAuthStore = defineStore('auth', {
     async signIn(email, password) {
       this.authError = null;
       this.authNotice = null;
-      if (!supabase) {
-        this.authError = 'Cloud workspace is not configured.';
+      const sb = getSupabase();
+      if (!sb) {
+        this.authError = getSupabaseConfigStatus() || 'Cloud workspace is not configured.';
         return false;
       }
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
       if (error) {
         this.authError = error.message;
         return false;
@@ -71,12 +74,13 @@ export const useAuthStore = defineStore('auth', {
     async signUp(email, password) {
       this.authError = null;
       this.authNotice = null;
-      if (!supabase) {
-        this.authError = 'Cloud workspace is not configured.';
+      const sb = getSupabase();
+      if (!sb) {
+        this.authError = getSupabaseConfigStatus() || 'Cloud workspace is not configured.';
         return false;
       }
 
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await sb.auth.signUp({
         email,
         password,
         options: {
@@ -95,7 +99,6 @@ export const useAuthStore = defineStore('auth', {
         return true;
       }
 
-      // Supabase email confirmation enabled — user exists but no session yet
       if (data.user) {
         this.authNotice =
           'Account created. Open the confirmation link in your email, then sign in here.';
@@ -107,7 +110,8 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async signOut() {
-      if (supabase) await supabase.auth.signOut();
+      const sb = getSupabase();
+      if (sb) await sb.auth.signOut();
       this.user = null;
       this.session = null;
       this.mode = 'guest';

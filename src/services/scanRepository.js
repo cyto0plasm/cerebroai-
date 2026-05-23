@@ -1,9 +1,10 @@
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { getSupabase, isSupabaseConfigured } from '../lib/supabase';
 
 export async function fetchUserScans(userId) {
-  if (!isSupabaseConfigured || !supabase) return [];
+  const sb = getSupabase();
+  if (!isSupabaseConfigured() || !sb) return [];
 
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from('scans')
     .select('id, display_name, payload, created_at')
     .eq('user_id', userId)
@@ -21,9 +22,10 @@ export async function fetchUserScans(userId) {
 }
 
 export async function upsertScan(userId, scan) {
-  if (!isSupabaseConfigured || !supabase) return;
+  const sb = getSupabase();
+  if (!sb) return;
 
-  const { error } = await supabase.from('scans').upsert({
+  const { error } = await sb.from('scans').upsert({
     id: scan.id,
     user_id: userId,
     display_name: scan.displayName || scan.fileName,
@@ -35,9 +37,10 @@ export async function upsertScan(userId, scan) {
 }
 
 export async function updateScanName(userId, scanId, displayName) {
-  if (!isSupabaseConfigured || !supabase) return;
+  const sb = getSupabase();
+  if (!sb) return;
 
-  const { data: existing, error: fetchErr } = await supabase
+  const { data: existing, error: fetchErr } = await sb
     .from('scans')
     .select('payload')
     .eq('id', scanId)
@@ -48,7 +51,7 @@ export async function updateScanName(userId, scanId, displayName) {
 
   const payload = { ...existing.payload, displayName, fileName: displayName };
 
-  const { error } = await supabase
+  const { error } = await sb
     .from('scans')
     .update({ display_name: displayName, payload, updated_at: new Date().toISOString() })
     .eq('id', scanId)
@@ -58,15 +61,17 @@ export async function updateScanName(userId, scanId, displayName) {
 }
 
 export async function deleteScan(userId, scanId) {
-  if (!isSupabaseConfigured || !supabase) return;
+  const sb = getSupabase();
+  if (!sb) return;
 
-  const { error } = await supabase.from('scans').delete().eq('id', scanId).eq('user_id', userId);
+  const { error } = await sb.from('scans').delete().eq('id', scanId).eq('user_id', userId);
   if (error) throw error;
 }
 
 export async function clearUserScans(userId) {
-  if (!isSupabaseConfigured || !supabase) return;
+  const sb = getSupabase();
+  if (!sb) return;
 
-  const { error } = await supabase.from('scans').delete().eq('user_id', userId);
+  const { error } = await sb.from('scans').delete().eq('user_id', userId);
   if (error) throw error;
 }
