@@ -13,7 +13,7 @@
 
   html.dark {
     color-scheme: dark;
-    background-color: #0f0e0d;
+    background-color: #0c0f14;
   }
 
   body {
@@ -21,7 +21,7 @@
   }
 
   html.dark body {
-    @apply text-surface-100 bg-surface-950;
+    @apply text-surface-100 bg-[#0c0f14];
   }
 
   ::-webkit-scrollbar {
@@ -38,18 +38,134 @@
 
 @layer components {
   .panel {
-    @apply bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-2xl shadow-card;
+    @apply bg-surface-0 border border-surface-200 rounded-2xl shadow-card;
+  }
+
+  html.dark .panel {
+    @apply bg-surface-900 border-surface-700;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.2), 0 4px 16px rgb(0 0 0 / 0.35);
   }
 
   .panel-header {
-    @apply px-5 py-4 border-b border-surface-100 dark:border-surface-700;
+    @apply px-5 py-4 border-b border-surface-100;
+  }
+
+  html.dark .panel-header {
+    @apply border-surface-700;
   }
 
   .input-field {
-    @apply w-full px-3 py-2.5 rounded-xl border border-surface-200 dark:border-surface-600
-      bg-surface-0 dark:bg-surface-900 text-sm text-surface-800 dark:text-surface-100
+    @apply w-full px-3 py-2.5 rounded-xl border border-surface-200 bg-surface-0 text-sm text-surface-800
       placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent
       transition-shadow;
+  }
+
+  html.dark .input-field {
+    @apply border-surface-600 bg-surface-800 text-surface-100 placeholder:text-surface-500;
+  }
+
+  .result-card {
+    @apply rounded-xl border p-5;
+  }
+
+  .result-card--tumor {
+    @apply bg-danger-50 border-danger-200;
+  }
+
+  html.dark .result-card--tumor {
+    @apply bg-danger-900 border-danger-700;
+  }
+
+  .result-card--clear {
+    @apply bg-success-50 border-success-200;
+  }
+
+  html.dark .result-card--clear {
+    @apply bg-success-900 border-success-700;
+  }
+
+  .result-export-btn {
+    @apply border border-surface-200 bg-surface-0 text-surface-800 hover:bg-surface-50;
+  }
+
+  html.dark .result-export-btn {
+    @apply border-surface-500 bg-surface-800 text-surface-100 hover:bg-surface-700;
+  }
+
+  .result-card--tumor .result-label {
+    @apply text-danger-600;
+  }
+  html.dark .result-card--tumor .result-label {
+    @apply text-danger-300;
+  }
+  .result-card--tumor .result-title {
+    @apply text-danger-900;
+  }
+  html.dark .result-card--tumor .result-title {
+    @apply text-danger-50;
+  }
+  .result-card--tumor .result-confidence {
+    @apply text-danger-800;
+  }
+  html.dark .result-card--tumor .result-confidence {
+    @apply text-danger-100;
+  }
+  .result-card--tumor .result-icon--tumor {
+    @apply bg-danger-100 text-danger-600;
+  }
+  html.dark .result-card--tumor .result-icon--tumor {
+    @apply bg-danger-800 text-danger-200;
+  }
+
+  .result-card--clear .result-label {
+    @apply text-success-600;
+  }
+  html.dark .result-card--clear .result-label {
+    @apply text-success-300;
+  }
+  .result-card--clear .result-title {
+    @apply text-success-900;
+  }
+  html.dark .result-card--clear .result-title {
+    @apply text-success-50;
+  }
+  .result-card--clear .result-confidence {
+    @apply text-success-800;
+  }
+  html.dark .result-card--clear .result-confidence {
+    @apply text-success-100;
+  }
+  .result-card--clear .result-icon--clear {
+    @apply bg-success-100 text-success-600;
+  }
+  html.dark .result-card--clear .result-icon--clear {
+    @apply bg-success-800 text-success-200;
+  }
+
+  .result-severity--tumor {
+    @apply bg-danger-50 text-danger-600;
+  }
+  html.dark .result-severity--tumor {
+    @apply bg-danger-800 text-danger-200;
+  }
+  .result-severity--clear {
+    @apply bg-success-50 text-success-600;
+  }
+  html.dark .result-severity--clear {
+    @apply bg-success-800 text-success-200;
+  }
+
+  .result-progress-track--tumor {
+    @apply bg-danger-200;
+  }
+  html.dark .result-progress-track--tumor {
+    @apply bg-danger-800;
+  }
+  .result-progress-track--clear {
+    @apply bg-success-200;
+  }
+  html.dark .result-progress-track--clear {
+    @apply bg-success-800;
   }
 
   .chip {

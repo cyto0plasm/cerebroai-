@@ -11,22 +11,22 @@
         </p>
       </div>
 
-      <form v-if="view === 'signin'" class="flex flex-col gap-3" @submit.prevent="handleSignIn">
+      <form v-if="view === 'signin' && auth.cloudEnabled" class="flex flex-col gap-3" @submit.prevent="handleSignIn">
         <input v-model="email" type="email" required placeholder="Email" class="input-field" autocomplete="email" />
-        <input v-model="password" type="password" required placeholder="Password" class="input-field" autocomplete="current-password" />
+        <input v-model="password" type="password" required minlength="8" maxlength="72" placeholder="Password" class="input-field" autocomplete="current-password" />
         <p v-if="auth.authError" class="text-xs text-danger-600" role="alert">{{ auth.authError }}</p>
         <p v-if="auth.authNotice" class="text-xs text-brand-700 dark:text-brand-300 bg-brand-50 dark:bg-brand-950 rounded-lg px-3 py-2" role="status">{{ auth.authNotice }}</p>
         <BaseButton type="submit" variant="primary" class="w-full" :loading="busy">Sign in</BaseButton>
-        <button type="button" class="text-xs text-brand-600 font-semibold" @click="view = 'signup'">Create account</button>
+        <button type="button" class="text-xs text-brand-600 font-semibold" @click="view = 'signup'; auth.authError = null">Create account</button>
       </form>
 
-      <form v-else-if="view === 'signup'" class="flex flex-col gap-3" @submit.prevent="handleSignUp">
-        <input v-model="email" type="email" required placeholder="Email" class="input-field" />
-        <input v-model="password" type="password" required minlength="8" placeholder="Password (8+ chars)" class="input-field" />
+      <form v-else-if="view === 'signup' && auth.cloudEnabled" class="flex flex-col gap-3" @submit.prevent="handleSignUp">
+        <input v-model="email" type="email" required placeholder="Email" class="input-field" autocomplete="email" />
+        <input v-model="password" type="password" required minlength="8" maxlength="72" placeholder="Password (8+ chars)" class="input-field" autocomplete="new-password" />
         <p v-if="auth.authError" class="text-xs text-danger-600" role="alert">{{ auth.authError }}</p>
         <p v-if="auth.authNotice" class="text-xs text-brand-700 dark:text-brand-300 bg-brand-50 dark:bg-brand-950 rounded-lg px-3 py-2" role="status">{{ auth.authNotice }}</p>
         <BaseButton type="submit" variant="primary" class="w-full" :loading="busy">Create account</BaseButton>
-        <button type="button" class="text-xs text-brand-600 font-semibold" @click="view = 'signin'">Already have an account</button>
+        <button type="button" class="text-xs text-brand-600 font-semibold" @click="view = 'signin'; auth.authError = null">Already have an account</button>
       </form>
 
       <div class="flex flex-col gap-2 pt-2 border-t border-surface-100 dark:border-surface-700">
@@ -38,30 +38,54 @@
         </p>
       </div>
 
-      <p v-if="!auth.cloudEnabled" class="text-xs text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800 rounded-lg px-3 py-2 leading-relaxed">
-        {{ auth.configHint || 'Cloud workspace is not configured. Add Supabase keys to .env.local and restart the dev server, or use Continue as guest.' }}
+      <p
+        v-if="!auth.loading && !auth.cloudEnabled"
+        class="text-xs text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800 rounded-lg px-3 py-2 leading-relaxed"
+      >
+        {{ auth.configHint || 'Cloud workspace is not configured. Use Continue as guest, or add Supabase keys and restart.' }}
       </p>
+      <p v-else-if="auth.loading" class="text-xs text-surface-400 text-center">Checking cloud workspace…</p>
     </div>
   </div>
 
-  <div
-    v-else-if="auth.isGuest"
-    class="chip bg-accent-500/10 text-accent-600 dark:text-accent-400 border border-accent-500/20 w-fit"
-  >
-    <UserRound class="w-3.5 h-3.5" />
-    Guest session — not saved to cloud
-  </div>
+  <template v-if="showToolbar">
+    <div
+      v-if="auth.isGuest"
+      :class="inline ? 'flex items-center gap-2 text-xs text-surface-500' : 'chip bg-accent-500/10 text-accent-600 dark:text-accent-400 border border-accent-500/20 w-fit'"
+    >
+      <UserRound class="w-3.5 h-3.5 shrink-0" />
+      <span>{{ inline ? 'Guest' : 'Guest session — not saved to cloud' }}</span>
+    </div>
 
-  <div
-    v-else-if="auth.isMember"
-    class="flex items-center gap-3 flex-wrap"
-  >
-    <div class="chip bg-brand-50 dark:bg-brand-950 text-brand-700 dark:text-brand-200 border border-brand-200 dark:border-brand-800">
+    <div
+      v-else-if="auth.isMember"
+      :class="inline ? 'flex items-center gap-3 text-sm shrink-0' : 'flex items-center gap-3 flex-wrap'"
+    >
+    <span
+      v-if="inline"
+      class="text-surface-600 dark:text-surface-400 truncate max-w-[200px] sm:max-w-xs"
+      :title="auth.userEmail"
+    >
+      {{ auth.userEmail }}
+    </span>
+    <div
+      v-else
+      class="chip bg-brand-50 dark:bg-brand-950 text-brand-700 dark:text-brand-200 border border-brand-200 dark:border-brand-800"
+    >
       <ShieldCheck class="w-3.5 h-3.5" />
       {{ auth.userEmail }}
     </div>
-    <BaseButton variant="ghost" size="sm" @click="handleSignOut">Sign out</BaseButton>
-  </div>
+    <button
+      v-if="inline"
+      type="button"
+      class="text-xs font-semibold text-brand-600 dark:text-brand-400 hover:underline shrink-0"
+      @click="handleSignOut"
+    >
+      Sign out
+    </button>
+    <BaseButton v-else variant="ghost" size="sm" @click="handleSignOut">Sign out</BaseButton>
+    </div>
+  </template>
 </template>
 
 <script setup>
@@ -79,6 +103,7 @@ import BaseButton from '../ui/BaseButton.vue';
 
 const props = defineProps({
   gate: { type: Boolean, default: false },
+  inline: { type: Boolean, default: false },
 });
 
 const auth = useAuthStore();
@@ -93,6 +118,9 @@ const guestChosen = ref(isGuestSessionChosen());
 const showGate = computed(
   () => props.gate && !auth.loading && auth.isGuest && !guestChosen.value
 );
+
+/** Gate-only instance must not render account UI (dashboard uses a separate inline bar). */
+const showToolbar = computed(() => props.inline || !props.gate);
 
 async function enterGuest() {
   auth.continueAsGuest();

@@ -29,7 +29,7 @@ export const CONFIG = {
     version: '2.0.0',
   },
 
-  APP_NAME: 'CerebroAI',
-  APP_TAGLINE: 'Brain MRI screening workspace',
+  APP_NAME: 'Cerebro',
+  APP_TAGLINE: 'Brain MRI screening',
   VERSION: '2.0.0',
 };

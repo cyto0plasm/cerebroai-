@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="store.history.length >= 2"
-    class="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 shadow-card overflow-hidden"
+    class="panel rounded-xl"
   >
     <div class="px-5 py-4 border-b border-surface-100 dark:border-surface-700">
       <h3 class="text-sm font-semibold text-surface-900 dark:text-surface-100">Compare scans</h3>

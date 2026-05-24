@@ -1,12 +1,12 @@
 <template>
-  <div class="bg-white rounded-xl border border-surface-200 shadow-card overflow-hidden">
-    <div class="px-5 py-4 border-b border-surface-100 flex items-start gap-3">
-      <div class="w-9 h-9 rounded-lg bg-brand-50 flex items-center justify-center shrink-0">
-        <BookOpen class="w-4 h-4 text-brand-600" />
+  <div class="panel rounded-xl">
+    <div class="px-5 py-4 border-b border-surface-100 dark:border-surface-700 flex items-start gap-3">
+      <div class="w-9 h-9 rounded-lg bg-brand-50 dark:bg-brand-950 flex items-center justify-center shrink-0">
+        <BookOpen class="w-4 h-4 text-brand-600 dark:text-brand-400" />
       </div>
       <div>
-        <h2 class="text-sm font-semibold text-surface-900">Before you analyze</h2>
-        <p class="text-xs text-surface-500 mt-0.5 leading-relaxed">
+        <h2 class="text-sm font-semibold text-surface-900 dark:text-surface-100">Before you analyze</h2>
+        <p class="text-xs text-surface-500 dark:text-surface-400 mt-0.5 leading-relaxed">
           Quick guide for clinicians and researchers using this screening tool.
         </p>
       </div>
@@ -16,20 +16,20 @@
       <div
         v-for="step in steps"
         :key="step.title"
-        class="flex gap-3 p-3.5 rounded-lg bg-surface-50 border border-surface-100"
+        class="flex gap-3 p-3.5 rounded-lg bg-surface-50 dark:bg-surface-800/50 border border-surface-100 dark:border-surface-700"
       >
-        <span class="w-6 h-6 rounded-full bg-white border border-surface-200 flex items-center justify-center text-[11px] font-bold text-brand-700 shrink-0">
+        <span class="w-6 h-6 rounded-full bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-600 flex items-center justify-center text-[11px] font-bold text-brand-700 dark:text-brand-300 shrink-0">
           {{ step.num }}
         </span>
         <div>
-          <p class="text-xs font-semibold text-surface-800">{{ step.title }}</p>
-          <p class="text-[11px] text-surface-500 mt-1 leading-relaxed">{{ step.body }}</p>
+          <p class="text-xs font-semibold text-surface-800 dark:text-surface-200">{{ step.title }}</p>
+          <p class="text-[11px] text-surface-500 dark:text-surface-400 mt-1 leading-relaxed">{{ step.body }}</p>
         </div>
       </div>
     </div>
 
     <div class="px-5 pb-5 flex flex-col gap-2">
-      <div class="rounded-lg border border-amber-100 bg-amber-50 px-3.5 py-3 text-xs text-amber-900 leading-relaxed">
+      <div class="rounded-lg border border-amber-100 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 px-3.5 py-3 text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
         <strong>Important:</strong> Results are screening aids only. Confirm with standard radiology workflow and clinical judgment.
       </div>
       <p class="text-[11px] text-surface-400">

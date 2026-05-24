@@ -1,27 +1,27 @@
 <template>
-  <div class="bg-white rounded-xl border border-surface-200 shadow-card overflow-hidden">
+  <div class="panel rounded-xl">
     <!-- Collapsed header — plots hidden until user expands -->
     <button
       type="button"
       :aria-expanded="expanded"
       aria-controls="prediction-plots-panel"
       @click="expanded = !expanded"
-      class="w-full px-5 py-4 flex items-center justify-between gap-4 text-left hover:bg-surface-50/80 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-500"
+      class="w-full px-5 py-4 flex items-center justify-between gap-4 text-left rounded-t-xl hover:bg-surface-50/80 dark:hover:bg-surface-800/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
     >
       <div class="flex items-center gap-3 min-w-0">
-        <div class="w-9 h-9 rounded-lg bg-surface-100 flex items-center justify-center shrink-0">
-          <BarChart3 class="w-4 h-4 text-surface-600" />
+        <div class="w-9 h-9 rounded-lg bg-surface-100 dark:bg-surface-800 flex items-center justify-center shrink-0">
+          <BarChart3 class="w-4 h-4 text-surface-600 dark:text-surface-400" />
         </div>
         <div class="min-w-0">
-          <p class="text-sm font-semibold text-surface-900">Visual analysis</p>
-          <p class="text-xs text-surface-400 mt-0.5 truncate">
+          <p class="text-sm font-semibold text-surface-900 dark:text-surface-100">Visual analysis</p>
+          <p class="text-xs text-surface-400 dark:text-surface-500 mt-0.5 truncate">
             {{ plotSummary }}
           </p>
         </div>
       </div>
 
       <div class="flex items-center gap-2 shrink-0">
-        <span class="hidden sm:inline text-xs font-medium text-brand-600">
+        <span class="hidden sm:inline text-xs font-medium text-brand-600 dark:text-brand-400">
           {{ expanded ? 'Hide plots' : 'Show plots' }}
         </span>
         <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-surface-100 text-surface-500">
@@ -38,10 +38,10 @@
     <div
       v-show="expanded"
       id="prediction-plots-panel"
-      class="border-t border-surface-100 animate-fade-in"
+      class="border-t border-surface-100 dark:border-surface-700 rounded-b-xl animate-fade-in"
     >
       <!-- Tab bar with better spacing -->
-      <div class="px-4 pt-4 pb-2 flex gap-2 overflow-x-auto scrollbar-thin border-b border-surface-100" role="tablist" aria-label="Visual analysis plots">
+      <div class="px-4 pt-4 pb-2 flex gap-2 overflow-x-auto border-b border-surface-100 dark:border-surface-700" role="tablist" aria-label="Visual analysis plots">
         <button
           v-for="tab in visibleTabs"
           :key="tab.id"
@@ -53,8 +53,8 @@
           :class="[
             'px-4 py-2.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-500',
             activeTab === tab.id
-              ? 'bg-brand-50 text-brand-700 border border-brand-200'
-              : 'text-surface-500 hover:text-surface-800 hover:bg-surface-50 border border-transparent'
+              ? 'bg-brand-50 dark:bg-brand-950 text-brand-700 dark:text-brand-200 border border-brand-200 dark:border-brand-800'
+              : 'text-surface-500 dark:text-surface-400 hover:text-surface-800 dark:hover:text-surface-200 hover:bg-surface-50 dark:hover:bg-surface-800 border border-transparent'
           ]"
         >
           {{ tab.label }}
@@ -146,13 +146,13 @@
             Model confidence split between tumor-positive and tumor-negative classes for this scan.
           </p>
 
-          <div class="rounded-lg border border-surface-100 bg-surface-50 p-4 flex flex-col gap-4">
+          <div class="rounded-lg border border-surface-100 dark:border-surface-700 bg-surface-50 dark:bg-surface-800/50 p-4 flex flex-col gap-4">
             <div v-for="row in probabilityRows" :key="row.label" class="flex flex-col gap-1.5">
               <div class="flex items-center justify-between text-xs">
                 <span class="font-semibold" :class="row.textClass">{{ row.label }}</span>
                 <span class="font-bold tabular-nums" :class="row.textClass">{{ row.percent }}%</span>
               </div>
-              <div class="h-2.5 rounded-full bg-white border border-surface-200 overflow-hidden">
+              <div class="h-2.5 rounded-full bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-600 overflow-hidden">
                 <div
                   class="h-full rounded-full transition-all duration-700 ease-out"
                   :class="row.barClass"
@@ -163,18 +163,18 @@
           </div>
 
           <!-- Mini donut-style summary -->
-          <div class="flex items-center gap-4 p-4 rounded-lg border border-surface-200">
+          <div class="flex items-center gap-4 p-4 rounded-lg border border-surface-200 dark:border-surface-700">
             <div
               class="relative w-16 h-16 rounded-full shrink-0"
               :style="{ background: donutGradient }"
               aria-hidden="true"
             >
-              <div class="absolute inset-2 rounded-full bg-white flex items-center justify-center">
-                <span class="text-xs font-bold text-surface-800 tabular-nums">{{ Math.round(scan.confidence * 100) }}%</span>
+              <div class="absolute inset-2 rounded-full bg-surface-0 dark:bg-surface-900 flex items-center justify-center">
+                <span class="text-xs font-bold text-surface-800 dark:text-surface-100 tabular-nums">{{ Math.round(scan.confidence * 100) }}%</span>
               </div>
             </div>
             <div>
-              <p class="text-sm font-semibold text-surface-900">Predicted: {{ scan.prediction }}</p>
+              <p class="text-sm font-semibold text-surface-900 dark:text-surface-100">Predicted: {{ scan.prediction }}</p>
               <p class="text-xs text-surface-400 mt-0.5">
                 {{ scan.prediction === 'Tumor' ? 'Tumor class' : 'No tumor class' }} assigned at
                 {{ Math.round(scan.confidence * 100) }}% confidence.

@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 shadow-card overflow-hidden">
+  <div class="panel rounded-xl">
     <div class="px-5 py-3 border-b border-surface-100 dark:border-surface-700">
       <h3 class="text-sm font-semibold text-surface-900 dark:text-surface-100">Session &amp; data</h3>
     </div>
@@ -63,16 +63,22 @@ function purgeAudit() {
   }
 }
 
+const MAX_IMPORT_BYTES = 2 * 1024 * 1024;
+
 async function importSession(e) {
   const file = e.target.files?.[0];
   if (!file) return;
+  if (file.size > MAX_IMPORT_BYTES) {
+    importMsg.value = 'File too large (max 2 MB).';
+    e.target.value = '';
+    return;
+  }
   try {
     const text = await file.text();
     const data = JSON.parse(text);
     const history = data.history || data;
-    if (!Array.isArray(history)) throw new Error('Invalid format');
-    store.importSession(history, true);
-    importMsg.value = `Imported ${history.length} record(s).`;
+    await store.importSession(history, true);
+    importMsg.value = `Imported successfully.`;
     setTimeout(() => { importMsg.value = ''; }, 4000);
   } catch (err) {
     importMsg.value = err.message || 'Import failed.';

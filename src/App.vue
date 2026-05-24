@@ -7,6 +7,7 @@ import { watch, onMounted } from 'vue';
 import DefaultLayout from './layouts/DefaultLayout.vue';
 import { useAppStore } from './stores/appStore';
 import { useAuthStore } from './stores/authStore';
+import { usePredictionStore } from './stores/predictionStore';
 import { markGuestSessionChosen } from './utils/guestSession';
 
 const app = useAppStore();

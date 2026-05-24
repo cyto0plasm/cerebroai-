@@ -2,11 +2,13 @@ import { createRouter, createWebHistory } from 'vue-router';
 import LandingPage from '../pages/LandingPage.vue';
 import DashboardPage from '../pages/DashboardPage.vue';
 import LimitationsPage from '../pages/LimitationsPage.vue';
+import ProfilePage from '../pages/ProfilePage.vue';
 import { CONFIG } from '../config';
 
 const routes = [
   { path: '/', name: 'landing', component: LandingPage, meta: { title: `${CONFIG.APP_NAME} — Overview` } },
   { path: '/dashboard', name: 'dashboard', component: DashboardPage, meta: { title: `${CONFIG.APP_NAME} — Workspace` } },
+  { path: '/profile', name: 'profile', component: ProfilePage, meta: { title: `${CONFIG.APP_NAME} — Profile` } },
   { path: '/limitations', name: 'limitations', component: LimitationsPage, meta: { title: `${CONFIG.APP_NAME} — Limitations` } },
   { path: '/:pathMatch(.*)*', redirect: '/' },
 ];

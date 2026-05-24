@@ -1,4 +1,5 @@
 import { getSupabase, isSupabaseConfigured } from '../lib/supabase';
+import { toCloudPayload, sanitizeDisplayName } from '../utils/scanCloud';
 
 export async function fetchUserScans(userId) {
   const sb = getSupabase();
@@ -25,11 +26,12 @@ export async function upsertScan(userId, scan) {
   const sb = getSupabase();
   if (!sb) return;
 
+  const cloudScan = toCloudPayload(scan);
   const { error } = await sb.from('scans').upsert({
     id: scan.id,
     user_id: userId,
-    display_name: scan.displayName || scan.fileName,
-    payload: scan,
+    display_name: sanitizeDisplayName(scan.displayName || scan.fileName),
+    payload: cloudScan,
     updated_at: new Date().toISOString(),
   });
 
@@ -49,11 +51,12 @@ export async function updateScanName(userId, scanId, displayName) {
 
   if (fetchErr) throw fetchErr;
 
-  const payload = { ...existing.payload, displayName, fileName: displayName };
+  const safeName = sanitizeDisplayName(displayName);
+  const payload = { ...existing.payload, displayName: safeName, fileName: safeName };
 
   const { error } = await sb
     .from('scans')
-    .update({ display_name: displayName, payload, updated_at: new Date().toISOString() })
+    .update({ display_name: safeName, payload, updated_at: new Date().toISOString() })
     .eq('id', scanId)
     .eq('user_id', userId);
 

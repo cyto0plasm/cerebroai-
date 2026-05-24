@@ -1,4 +1,5 @@
 import { CLINICAL_REPORTS, TUMOR_CLASSES } from '../constants';
+import { sanitizeDisplayName, sanitizePatientId } from './scanCloud';
 
 export function buildScanRecord(scanResult, id = `scan-${Date.now()}`) {
   let findings = '';
@@ -16,7 +17,7 @@ export function buildScanRecord(scanResult, id = `scan-${Date.now()}`) {
     recommendation = CLINICAL_REPORTS.NO_TUMOR.recommendation;
   }
 
-  const displayName = scanResult.displayName || scanResult.fileName;
+  const displayName = sanitizeDisplayName(scanResult.displayName || scanResult.fileName) || 'Study';
 
   return {
     id,
@@ -28,7 +29,7 @@ export function buildScanRecord(scanResult, id = `scan-${Date.now()}`) {
     prediction: scanResult.prediction,
     confidence: scanResult.confidence,
     heatmap: scanResult.heatmap || null,
-    patientId: scanResult.patientId?.trim() || null,
+    patientId: sanitizePatientId(scanResult.patientId),
     batchId: scanResult.batchId || null,
     sliceIndex: scanResult.sliceIndex ?? null,
     imageWidth: scanResult.imageWidth ?? null,

@@ -14,23 +14,36 @@ export function getSupabaseEnv() {
   return { url, key };
 }
 
+function isValidSupabaseHost(url) {
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    return host.endsWith('.supabase.co') || host.endsWith('.supabase.in');
+  } catch {
+    return false;
+  }
+}
+
 export function isSupabaseConfigured() {
   const { url, key } = getSupabaseEnv();
   if (!url || !key) return false;
-  if (url.includes('your-project')) return false;
-  if (!key.startsWith('eyJ')) return false;
-  return url.includes('supabase.co');
+  if (url.includes('your-project') || key.includes('your-anon')) return false;
+  if (key.length < 20) return false;
+  return isValidSupabaseHost(url);
 }
 
 export function getSupabaseConfigStatus() {
   const { url, key } = getSupabaseEnv();
+  const isProd = import.meta.env.PROD;
+
   if (!url && !key) {
-    return 'Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env.local, then restart npm run dev.';
+    return isProd
+      ? 'Cloud sign-in is not set up on this site. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Vercel → Environment Variables, then redeploy. You can still use Continue as guest.'
+      : 'Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env.local, then restart npm run dev.';
   }
-  if (!url) return 'Missing VITE_SUPABASE_URL in .env.local';
-  if (!key) return 'Missing VITE_SUPABASE_ANON_KEY in .env.local';
+  if (!url) return isProd ? 'Missing VITE_SUPABASE_URL in Vercel env.' : 'Missing VITE_SUPABASE_URL in .env.local';
+  if (!key) return isProd ? 'Missing VITE_SUPABASE_ANON_KEY in Vercel env.' : 'Missing VITE_SUPABASE_ANON_KEY in .env.local';
   if (!isSupabaseConfigured()) {
-    return 'Invalid Supabase settings. URL must be https://YOUR_REF.supabase.co (no /rest/v1). Key must be the anon public key.';
+    return 'Invalid Supabase settings. URL must be https://YOUR_REF.supabase.co (no /rest/v1). Use the anon public key from Project Settings → API.';
   }
   return null;
 }

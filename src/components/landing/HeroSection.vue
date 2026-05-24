@@ -2,7 +2,7 @@
   <section class="relative overflow-hidden border-b border-surface-200 dark:border-surface-800 bg-surface-50 dark:bg-surface-950">
     <div aria-hidden="true" class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-brand-100/40 via-transparent to-transparent dark:from-brand-950/50" />
 
-    <div class="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 text-center">
+    <div class="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-26 text-center">
       <div class="flex justify-center mb-8">
         <AppLogo :link="false" size="lg" show-tagline />
       </div>

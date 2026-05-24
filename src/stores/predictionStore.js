@@ -4,6 +4,7 @@ import { buildScanRecord, aggregateBatchPredictions } from '../utils/scanRecord'
 import { appendAuditEntry, clearAuditLog, loadAuditLog } from '../utils/auditLog';
 import { useAuthStore } from './authStore';
 import * as scanRepo from '../services/scanRepository';
+import { sanitizeDisplayName, validateImportHistory } from '../utils/scanCloud';
 
 export { aggregateBatchPredictions };
 
@@ -16,6 +17,7 @@ export const usePredictionStore = defineStore('prediction', {
     activeScan: { status: 'idle', progress: 0, error: null, result: null },
     batchSummary: null,
     syncing: false,
+    workspaceError: null,
   }),
 
   getters: {
@@ -56,11 +58,17 @@ export const usePredictionStore = defineStore('prediction', {
 
       if (auth.isMember && auth.user) {
         this.syncing = true;
+        this.workspaceError = null;
         try {
           this.history = await scanRepo.fetchUserScans(auth.user.id);
           this.selectedHistoryId = this.history[0]?.id || null;
+          this.workspaceError = null;
         } catch (e) {
           console.error('[CerebroAI] Failed to load workspace', e);
+          this.workspaceError =
+            e?.message?.includes('relation') || e?.code === '42P01'
+              ? 'Cloud database not ready. Run supabase/schema.sql in your Supabase project.'
+              : 'Could not load your cloud studies. Try signing out and back in.';
         } finally {
           this.syncing = false;
         }
@@ -82,6 +90,7 @@ export const usePredictionStore = defineStore('prediction', {
           await scanRepo.upsertScan(auth.user.id, newScan);
         } catch (e) {
           console.error('[CerebroAI] Cloud save failed', e);
+          this.workspaceError = 'Study analyzed but cloud save failed. Check your connection or database setup.';
         }
       }
 
@@ -98,7 +107,7 @@ export const usePredictionStore = defineStore('prediction', {
     },
 
     async renameScan(id, displayName) {
-      const name = displayName.trim();
+      const name = sanitizeDisplayName(displayName);
       if (!name) return;
 
       const item = this.history.find((h) => h.id === id);
@@ -164,9 +173,7 @@ export const usePredictionStore = defineStore('prediction', {
       const auth = useAuthStore();
       if (!auth.isMember) return;
 
-      const cleaned = (history || []).filter(
-        (item) => item?.id && item?.prediction && item?.confidence != null
-      );
+      const cleaned = validateImportHistory(history);
 
       if (merge) {
         const ids = new Set(this.history.map((h) => h.id));
